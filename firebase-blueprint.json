@@ -1,0 +1,138 @@
+{
+  "entities": {
+    "Listing": {
+      "title": "Listing",
+      "description": "A product or service listed on the marketplace",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string", "description": "Title of the listing" },
+        "price": { "type": "number", "description": "Price in cents" },
+        "location": { "type": "string", "description": "Geographic location" },
+        "category": { "type": "string", "description": "Category ID" },
+        "subcategory": { "type": "string", "description": "Subcategory ID" },
+        "image": { "type": "string", "description": "Main image URL" },
+        "type": { "type": "string", "enum": ["product", "service"] },
+        "sellerId": { "type": "string", "description": "UID of the seller" },
+        "sellerName": { "type": "string", "description": "Display name of the seller" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "aiVerified": { "type": "boolean", "description": "Whether AI has verified the listing" }
+      },
+      "required": ["title", "price", "category", "sellerId", "createdAt"]
+    },
+    "Conversation": {
+      "title": "Conversation",
+      "description": "A chat between a buyer and a seller",
+      "type": "object",
+      "properties": {
+        "participants": { "type": "array", "description": "UIDs of the participants" },
+        "lastMessage": { "type": "string", "description": "Last message text" },
+        "lastUpdate": { "type": "string", "format": "date-time" },
+        "listingId": { "type": "string", "description": "Optional reference to a listing" }
+      },
+      "required": ["participants", "lastUpdate"]
+    },
+    "Message": {
+      "title": "Message",
+      "description": "A single message in a conversation",
+      "type": "object",
+      "properties": {
+        "senderId": { "type": "string", "description": "UID of the sender" },
+        "text": { "type": "string", "description": "Message content" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["senderId", "text", "createdAt"]
+    },
+    "Review": {
+      "title": "Review",
+      "description": "A review for a product, service, or seller",
+      "type": "object",
+      "properties": {
+        "reviewerId": { "type": "string", "description": "UID of the reviewer" },
+        "reviewerName": { "type": "string", "description": "Name of the reviewer" },
+        "targetId": { "type": "string", "description": "ID of the listing or user being reviewed" },
+        "targetType": { "type": "string", "enum": ["listing", "user"] },
+        "rating": { "type": "number", "description": "1-5 stars" },
+        "comment": { "type": "string", "description": "Review text" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["reviewerId", "targetId", "targetType", "rating", "createdAt"]
+    },
+    "Transaction": {
+      "title": "Transaction",
+      "description": "A financial transaction for the user's wallet",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "Owner of the transaction" },
+        "amount": { "type": "number", "description": "Amount in cents (positive or negative)" },
+        "type": { "type": "string", "enum": ["deposit", "withdrawal", "sale", "purchase"] },
+        "description": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "amount", "type", "createdAt"]
+    },
+    "Wallet": {
+      "title": "Wallet",
+      "description": "User's financial balance",
+      "type": "object",
+      "properties": {
+        "balance": { "type": "number", "description": "Current balance in credits" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["balance"]
+    },
+    "OmniBot": {
+      "title": "OmniBot",
+      "description": "An autonomous AI bot worker",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "type": { "type": "string" },
+        "status": { "type": "string" },
+        "userId": { "type": "string" },
+        "efficiency": { "type": "number" },
+        "uptime": { "type": "string" },
+        "actionsCount": { "type": "number" },
+        "lastAction": { "type": "string" }
+      },
+      "required": ["name", "type", "status", "userId"]
+    }
+  },
+  "firestore": {
+    "/omnibots/{botId}": {
+      "schema": { "$ref": "#/entities/OmniBot" },
+      "description": "User's AI automation bots"
+    },
+    "/listings/{listingId}": {
+      "schema": { "$ref": "#/entities/Listing" },
+      "description": "Public marketplace listings"
+    },
+    "/reviews/{reviewId}": {
+      "schema": { "$ref": "#/entities/Review" },
+      "description": "Public reviews for listings"
+    },
+    "/listings/{listingId}/reviews/{reviewId}": {
+      "schema": { "$ref": "#/entities/Review" },
+      "description": "Reviews for a specific listing"
+    },
+    "/wallets/{userId}": {
+      "schema": { "$ref": "#/entities/Wallet" },
+      "description": "User wallets"
+    },
+    "/conversations/{convId}": {
+      "schema": { "$ref": "#/entities/Conversation" },
+      "description": "Chat conversations"
+    },
+    "/conversations/{convId}/messages/{msgId}": {
+      "schema": { "$ref": "#/entities/Message" },
+      "description": "Messages within a conversation"
+    },
+    "/users/{userId}/reviews/{reviewId}": {
+      "schema": { "$ref": "#/entities/Review" },
+      "description": "Reviews for a specific user"
+    },
+    "/transactions/{txId}": {
+      "schema": { "$ref": "#/entities/Transaction" },
+      "description": "User wallet transactions"
+    }
+  }
+}

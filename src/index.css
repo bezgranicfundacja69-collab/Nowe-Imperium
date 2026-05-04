@@ -1,0 +1,33 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Space+Grotesk:wght@300;700&family=Playfair+Display:ital,wght@0,900;1,900&family=Libre+Baskerville:ital@0;1&display=swap');
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui;
+  --font-display: "Space Grotesk", sans-serif;
+  --font-serif: "Libre Baskerville", serif;
+  --font-editorial: "Playfair Display", serif;
+  
+  --color-brand-neon: #00f2ff;
+  --color-brand-glow: #7000ff;
+  
+  --animate-spin-slow: spin 4s linear infinite;
+}
+
+@layer base {
+  body {
+    @apply bg-slate-50 text-slate-900 antialiased font-sans;
+  }
+  
+  h1, h2, h3, h4, .font-black {
+    @apply font-black tracking-tighter;
+    font-family: inherit;
+  }
+}
+
+.glow-text {
+  text-shadow: 0 0 20px rgba(0, 242, 255, 0.4);
+}
+
+.aggressive-gradient {
+  background: linear-gradient(135deg, #000000 0%, #0f172a 100%);
+}
