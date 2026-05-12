@@ -95,7 +95,7 @@ export function CartView({ items, onRemove, onCheckout, onContinueShopping }: Ca
                   <span>{formatPrice(total)}</span>
                </div>
                <div className="flex justify-between text-slate-400 font-bold text-sm">
-                  <span>Dostawa OmniExpress</span>
+                  <span>Dostawa noweExpress</span>
                   <span className="text-emerald-400">GRATIS</span>
                </div>
                <div className="h-px bg-white/10 my-6" />
@@ -124,9 +124,9 @@ export function CartView({ items, onRemove, onCheckout, onContinueShopping }: Ca
                 <Zap size={20} />
              </div>
              <div>
-                <p className="text-blue-900 font-bold text-sm italic">Status Premium OmniMarket</p>
+                <p className="text-blue-900 font-bold text-sm italic">Status Premium noweimperium</p>
                 <p className="text-blue-600/70 text-xs font-medium leading-relaxed mt-1 italic">
-                  Twoje zamówienie kwalifikuje się do darmowej dostawy AI i 5% cashbacku w OmniCash.
+                  Twoje zamówienie kwalifikuje się do darmowej dostawy AI i 5% cashbacku w noweCash.
                 </p>
              </div>
           </div>

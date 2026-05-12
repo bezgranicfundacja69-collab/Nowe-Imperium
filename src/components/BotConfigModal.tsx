@@ -156,7 +156,7 @@ export function BotConfigModal({ isOpen, onClose, bot }: BotConfigModalProps) {
                        <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Model Językowy (LLM)</p>
                        <select className="w-full p-4 rounded-2xl bg-slate-50 border-none font-bold text-sm focus:ring-2 focus:ring-blue-500/20">
                           <option>Gemini 1.5 Pro (Zalecane)</option>
-                          <option>OmniCore Custom Node</option>
+                          <option>noweCore Custom Node</option>
                           <option>GPT-4o Integration</option>
                        </select>
                     </div>

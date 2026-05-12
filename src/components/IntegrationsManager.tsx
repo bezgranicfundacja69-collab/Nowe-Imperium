@@ -60,7 +60,9 @@ const PLATFORMS = [
   }
 ];
 
-export function IntegrationsManager() {
+import { ViewProps } from '../types/view';
+
+export function IntegrationsManager({ onNavigate, cart }: ViewProps) {
   const localPlatforms = PLATFORMS.filter(p => p.type === 'local');
   const globalPlatforms = PLATFORMS.filter(p => p.type === 'global');
 
@@ -88,7 +90,7 @@ export function IntegrationsManager() {
             EKSPORTUJ <br /> <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400 font-black glow-text">BEZ GRANIC.</span>
           </h1>
           <p className="mb-12 max-w-xl text-xl font-medium leading-relaxed text-slate-400 italic">
-            Zintegrowany system sprzedaży zagranicznej. Wystawiaj towary na rynkach UE, USA i Azji bezpośrednio z panelu OmniMarket.
+            Zintegrowany system sprzedaży zagranicznej. Wystawiaj towary na rynkach UE, USA i Azji bezpośrednio z panelu noweimperium.
           </p>
         </div>
       </div>
@@ -156,7 +158,7 @@ export function IntegrationsManager() {
                 <div className="relative z-10">
                     <h3 className="text-xl font-black mb-2 italic tracking-tighter">OSZCZĘDNOŚĆ NA PRZEWALUTOWANIU</h3>
                     <p className="text-4xl font-black mb-6">DO -5%</p>
-                    <p className="text-emerald-100 text-xs font-bold leading-relaxed mb-6">OmniMarket używa kont wielowalutowych, eliminując wysokie prowizje bankowe przy sprzedaży zagranicznej.</p>
+                    <p className="text-emerald-100 text-xs font-bold leading-relaxed mb-6">noweimperium używa kont wielowalutowych, eliminując wysokie prowizje bankowe przy sprzedaży zagranicznej.</p>
                     <div className="h-1 bg-white/20 rounded-full w-full mb-2">
                         <div className="h-full bg-white rounded-full w-3/4" />
                     </div>

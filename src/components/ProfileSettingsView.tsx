@@ -27,15 +27,90 @@ import {
   BadgeCheck,
   Trophy,
   Star,
-  ExternalLink
+  ExternalLink,
+  CreditCard,
+  Loader2
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 
-interface ProfileSettingsViewProps {
+import { ViewProps } from '../types/view';
+import { setDoc, serverTimestamp } from 'firebase/firestore';
+
+interface ProfileSettingsViewProps extends ViewProps {
   onBack: () => void;
 }
 
-export function ProfileSettingsView({ onBack }: ProfileSettingsViewProps) {
+const BRAND_CONFIG: Record<string, { icon: React.ReactNode, color: string, lightBg: string, label: string, placeholder: string }> = {
+  facebook: { 
+    icon: <Facebook size={18} />, 
+    color: "bg-[#1877F2]", 
+    lightBg: "bg-[#1877F2]/10",
+    label: "Facebook",
+    placeholder: "facebook.com/username"
+  },
+  instagram: { 
+    icon: <Instagram size={18} />, 
+    color: "bg-[#E4405F]", 
+    lightBg: "bg-[#E4405F]/10",
+    label: "Instagram",
+    placeholder: "@username"
+  },
+  tiktok: { 
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5" />
+      </svg>
+    ), 
+    color: "bg-[#010101]", 
+    lightBg: "bg-[#010101]/10",
+    label: "TikTok",
+    placeholder: "@username"
+  },
+  messenger: { 
+    icon: <MessageCircle size={18} />, 
+    color: "bg-[#0084FF]", 
+    lightBg: "bg-[#0084FF]/10",
+    label: "Messenger",
+    placeholder: "m.me/username"
+  },
+  youtube: { 
+    icon: <Youtube size={18} />, 
+    color: "bg-[#FF0000]", 
+    lightBg: "bg-[#FF0000]/10",
+    label: "YouTube",
+    placeholder: "youtube.com/c/channel"
+  },
+  twitter: { 
+    icon: <Twitter size={18} />, 
+    color: "bg-[#1DA1F2]", 
+    lightBg: "bg-[#1DA1F2]/10",
+    label: "Twitter / X",
+    placeholder: "@username"
+  },
+  telegram: { 
+    icon: <Send size={18} />, 
+    color: "bg-[#26A5E4]", 
+    lightBg: "bg-[#26A5E4]/10",
+    label: "Telegram",
+    placeholder: "t.me/username"
+  },
+  linkedin: { 
+    icon: <Linkedin size={18} />, 
+    color: "bg-[#0077B5]", 
+    lightBg: "bg-[#0077B5]/10",
+    label: "LinkedIn",
+    placeholder: "linkedin.com/in/username"
+  },
+  github: { 
+    icon: <Github size={18} />, 
+    color: "bg-[#181717]", 
+    lightBg: "bg-[#181717]/10",
+    label: "GitHub",
+    placeholder: "github.com/username"
+  }
+};
+
+export function ProfileSettingsView({ onBack, onNavigate, cart }: ProfileSettingsViewProps) {
   const { user, updateUserData } = useAuth();
   const [formData, setFormData] = useState({
     bio: '',
@@ -56,6 +131,19 @@ export function ProfileSettingsView({ onBack }: ProfileSettingsViewProps) {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
   const [showPreview, setShowPreview] = useState(false);
+  
+  // Stripe Connect State
+  const [stripeStatus, setStripeStatus] = useState<{
+    accountId: string | null;
+    chargesEnabled: boolean;
+    payoutsEnabled: boolean;
+    loading: boolean;
+  }>({
+    accountId: null,
+    chargesEnabled: false,
+    payoutsEnabled: false,
+    loading: true
+  });
 
   useEffect(() => {
     async function fetchUserData() {
@@ -63,6 +151,35 @@ export function ProfileSettingsView({ onBack }: ProfileSettingsViewProps) {
       try {
         const userRef = doc(db, 'users', user.uid);
         const userSnap = await getDoc(userRef);
+        
+        // Fetch Stripe Info
+        const stripeRef = doc(db, 'sellerStripeInfo', user.uid);
+        const stripeSnap = await getDoc(stripeRef);
+        
+        if (stripeSnap.exists()) {
+          const stripeData = stripeSnap.data();
+          setStripeStatus(prev => ({ ...prev, accountId: stripeData.stripeAccountId }));
+          
+          // Check actual status from Stripe via our server
+          try {
+            const response = await fetch(`/api/stripe/connect/status/${stripeData.stripeAccountId}`);
+            if (response.ok) {
+              const status = await response.json();
+              setStripeStatus(prev => ({
+                ...prev,
+                chargesEnabled: status.chargesEnabled,
+                payoutsEnabled: status.payoutsEnabled,
+                loading: false
+              }));
+            }
+          } catch (e) {
+            console.error("Error fetching Stripe status:", e);
+            setStripeStatus(prev => ({ ...prev, loading: false }));
+          }
+        } else {
+          setStripeStatus(prev => ({ ...prev, loading: false }));
+        }
+
         if (userSnap.exists()) {
           const data = userSnap.data();
           setFormData({
@@ -114,6 +231,39 @@ export function ProfileSettingsView({ onBack }: ProfileSettingsViewProps) {
         [key]: value
       }
     }));
+  };
+
+  const handleStripeOnboarding = async () => {
+    if (!user) return;
+    setStripeStatus(prev => ({ ...prev, loading: true }));
+    try {
+      const response = await fetch('/api/stripe/connect/onboard', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: user.uid,
+          email: user.email
+        })
+      });
+
+      if (response.ok) {
+        const { accountId, url } = await response.json();
+        
+        // Save the account ID to Firestore immediately
+        await setDoc(doc(db, 'sellerStripeInfo', user.uid), {
+          userId: user.uid,
+          stripeAccountId: accountId,
+          updatedAt: serverTimestamp()
+        }, { merge: true });
+
+        // Redirect to Stripe onboarding
+        window.location.href = url;
+      }
+    } catch (error) {
+      console.error("Stripe onboarding error:", error);
+      setMessage({ type: 'error', text: 'Nie udało się zainicjować połączenia ze Stripe.' });
+      setStripeStatus(prev => ({ ...prev, loading: false }));
+    }
   };
 
   const isFormDirty = true; // For now always true, could be computed
@@ -170,7 +320,7 @@ export function ProfileSettingsView({ onBack }: ProfileSettingsViewProps) {
                   <Settings size={12} /> Account Configuration
                 </div>
                 <h2 className="text-4xl font-black italic tracking-tighter sm:text-5xl">Ustawienia Profilu</h2>
-                <p className="text-slate-400 text-lg font-medium italic">Zarządzaj swoim śladem w sieci OmniMarket.</p>
+                <p className="text-slate-400 text-lg font-medium italic">Zarządzaj swoim śladem w sieci noweimperium.</p>
               </div>
             </div>
 
@@ -230,74 +380,70 @@ export function ProfileSettingsView({ onBack }: ProfileSettingsViewProps) {
                   <SectionHeader icon={<Share2 className="text-blue-600" />} title="Ekosystem Społecznościowy" />
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4">
-                    <SocialInput 
-                      icon={<Facebook size={18} />} 
-                      label="Facebook" 
-                      value={formData.socialLinks.facebook}
-                      onChange={(val) => handleSocialChange('facebook', val)}
-                      placeholder="facebook.com/uzytkownik"
-                      color="blue"
-                    />
-                    <SocialInput 
-                      icon={<Instagram size={18} />} 
-                      label="Instagram" 
-                      value={formData.socialLinks.instagram}
-                      onChange={(val) => handleSocialChange('instagram', val)}
-                      placeholder="@uzytkownik"
-                      color="pink"
-                    />
-                    <SocialInput 
-                      icon={
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5" />
-                        </svg>
-                      } 
-                      label="TikTok" 
-                      value={formData.socialLinks.tiktok}
-                      onChange={(val) => handleSocialChange('tiktok', val)}
-                      placeholder="@uzytkownik"
-                      color="slate"
-                    />
-                    <SocialInput 
-                      icon={<MessageCircle size={18} />} 
-                      label="Messenger" 
-                      value={formData.socialLinks.messenger}
-                      onChange={(val) => handleSocialChange('messenger', val)}
-                      placeholder="m.me/uzytkownik"
-                      color="indigo"
-                    />
-                    <SocialInput 
-                      icon={<Youtube size={18} />} 
-                      label="YouTube" 
-                      value={formData.socialLinks.youtube}
-                      onChange={(val) => handleSocialChange('youtube', val)}
-                      placeholder="youtube.com/c/kanal"
-                      color="red"
-                    />
-                    <SocialInput 
-                      icon={<Twitter size={18} />} 
-                      label="Twitter / X" 
-                      value={formData.socialLinks.twitter}
-                      onChange={(val) => handleSocialChange('twitter', val)}
-                      placeholder="@uzytkownik"
-                      color="sky"
-                    />
-                    <SocialInput 
-                      icon={<Send size={18} />} 
-                      label="Telegram" 
-                      value={formData.socialLinks.telegram}
-                      onChange={(val) => handleSocialChange('telegram', val)}
-                      placeholder="t.me/uzytkownik"
-                      color="sky"
-                    />
-                    <SocialInput 
-                      icon={<Linkedin size={18} />} 
-                      label="LinkedIn" 
-                      value={formData.socialLinks.linkedin}
-                      onChange={(val) => handleSocialChange('linkedin', val)}
-                      placeholder="linkedin.com/in/uzytkownik"
-                      color="blue"
-                    />
+                    {Object.entries(BRAND_CONFIG).map(([key, config]) => (
+                      <SocialInput 
+                        key={key}
+                        icon={config.icon} 
+                        label={config.label} 
+                        value={formData.socialLinks[key as keyof typeof formData.socialLinks]}
+                        onChange={(val) => handleSocialChange(key as keyof typeof formData.socialLinks, val)}
+                        placeholder={config.placeholder}
+                        platformKey={key}
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                <div className="space-y-8">
+                  <SectionHeader icon={<CreditCard className="text-blue-600" />} title="Finanse i Wypłaty (Stripe Connect)" />
+                  
+                  <div className="bg-slate-50 rounded-[32px] p-6 border border-slate-100 space-y-4">
+                    <div className="flex items-center gap-4">
+                       <div className={cn(
+                         "h-12 w-12 rounded-2xl flex items-center justify-center",
+                         stripeStatus.chargesEnabled ? "bg-emerald-100 text-emerald-600" : "bg-slate-100 text-slate-400"
+                       )}>
+                          <ShieldCheck size={24} />
+                       </div>
+                       <div>
+                          <p className="text-sm font-black italic tracking-tight">Status Płatności</p>
+                          <p className="text-xs text-slate-500 font-medium italic">Włącz bezpośrednie płatności na swoje konto.</p>
+                       </div>
+                    </div>
+
+                    <div className="space-y-3">
+                       {stripeStatus.loading ? (
+                         <div className="flex items-center gap-2 text-xs font-bold text-slate-400 p-4 animate-pulse">
+                            <Loader2 size={14} className="animate-spin" /> Sprawdzanie statusu Stripe...
+                         </div>
+                       ) : stripeStatus.chargesEnabled ? (
+                         <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-4 flex items-center justify-between">
+                            <div className="flex items-center gap-2 text-emerald-700 text-xs font-black">
+                               <CheckCircle2 size={16} /> TWOJE KONTO JEST AKTYWNE
+                            </div>
+                            <button 
+                              type="button"
+                              onClick={() => window.open('https://dashboard.stripe.com', '_blank')}
+                              className="text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-blue-600 flex items-center gap-1"
+                            >
+                               Panel Stripe <ExternalLink size={10} />
+                            </button>
+                         </div>
+                       ) : (
+                         <button 
+                           type="button"
+                           onClick={handleStripeOnboarding}
+                           className="w-full bg-slate-900 hover:bg-black text-white py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 transition-all shadow-lg hover:-translate-y-0.5"
+                         >
+                            <CreditCard size={14} /> Połącz Konto noweimperium ze Stripe
+                         </button>
+                       )}
+
+                       <p className="text-[10px] text-slate-400 font-medium italic text-center px-4">
+                         Używamy Stripe Connect Express, aby bezpiecznie przetwarzać Twoje wypłaty. 
+                         Pieniądze trafiają bezpośrednio na Twoje konto bankowe.
+                       </p>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -390,7 +536,7 @@ export function ProfileSettingsView({ onBack }: ProfileSettingsViewProps) {
                        <MapPin size={12} /> {formData.location || 'Brak Lokalizacji'}
                      </div>
                      <div className="px-3 py-1 bg-slate-100 rounded-full text-[10px] font-bold text-slate-600 uppercase tracking-wider flex items-center gap-1">
-                       <Globe size={12} /> OmniID: #{user?.uid.substring(0,6).toUpperCase()}
+                       <Globe size={12} /> noweID: #{user?.uid.substring(0,6).toUpperCase()}
                      </div>
                    </div>
 
@@ -405,9 +551,17 @@ export function ProfileSettingsView({ onBack }: ProfileSettingsViewProps) {
                    <div className="flex flex-wrap justify-center gap-3 mb-8">
                       {Object.entries(formData.socialLinks).map(([key, value]) => {
                         if (!value) return null;
+                        const config = BRAND_CONFIG[key];
+                        if (!config) return null;
                         return (
-                          <div key={key} className="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 border border-slate-100 shadow-sm transition-all hover:bg-white hover:text-blue-600 hover:-translate-y-1">
-                            <SocialIcon name={key} />
+                          <div 
+                            key={key} 
+                            className={cn(
+                              "h-10 w-10 rounded-xl flex items-center justify-center text-white shadow-lg transition-all hover:-translate-y-1 active:scale-95",
+                              config.color
+                            )}
+                          >
+                            {config.icon}
                           </div>
                         );
                       })}
@@ -470,15 +624,17 @@ function FormGroup({ label, desc, children }: { label: string, desc: string, chi
   );
 }
 
-function SocialInput({ icon, label, value, onChange, placeholder, color }: { icon: any, label: string, value: string, onChange: (val: string) => void, placeholder: string, color: string }) {
-  const colorMaps: any = {
-    blue: "group-focus-within:text-blue-600 group-focus-within:border-blue-500",
-    pink: "group-focus-within:text-pink-600 group-focus-within:border-pink-500",
-    red: "group-focus-within:text-red-600 group-focus-within:border-red-500",
-    sky: "group-focus-within:text-sky-600 group-focus-within:border-sky-500",
-    indigo: "group-focus-within:text-indigo-600 group-focus-within:border-indigo-500",
-    slate: "group-focus-within:text-slate-900 group-focus-within:border-slate-900"
-  };
+interface SocialInputProps {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+  onChange: (val: string) => void;
+  placeholder: string;
+  platformKey: string;
+}
+
+const SocialInput: React.FC<SocialInputProps> = ({ icon, label, value, onChange, placeholder, platformKey }) => {
+  const config = BRAND_CONFIG[platformKey];
 
   return (
     <div className="group space-y-1.5">
@@ -487,42 +643,23 @@ function SocialInput({ icon, label, value, onChange, placeholder, color }: { ico
       </div>
       <div className="relative">
         <div className={cn(
-          "absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 transition-colors",
-          colorMaps[color]?.split(' ')[0]
+          "absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-lg flex items-center justify-center text-white transition-all shadow-sm",
+          config?.color || "bg-slate-400"
         )}>
           {icon}
         </div>
         <input 
           type="text" 
-          value={value}
+          value={value || ''}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
           className={cn(
-            "w-full bg-slate-50 border-2 border-transparent rounded-[20px] pl-12 pr-4 py-3 text-sm focus:ring-4 focus:ring-slate-500/5 focus:bg-white transition-all font-bold placeholder:font-medium shadow-inner",
-            colorMaps[color]?.split(' ')[1]
+            "w-full bg-slate-50 border-2 border-transparent rounded-[20px] pl-14 pr-4 py-3 text-sm focus:ring-4 focus:ring-slate-500/5 focus:bg-white transition-all font-bold placeholder:font-medium shadow-inner",
+            "group-focus-within:border-slate-200"
           )}
         />
       </div>
     </div>
   );
-}
-
-function SocialIcon({ name }: { name: string }) {
-  switch (name) {
-    case 'facebook': return <Facebook size={18} />;
-    case 'instagram': return <Instagram size={18} />;
-    case 'twitter': return <Twitter size={18} />;
-    case 'youtube': return <Youtube size={18} />;
-    case 'linkedin': return <Linkedin size={18} />;
-    case 'github': return <Github size={18} />;
-    case 'messenger': return <MessageCircle size={18} />;
-    case 'telegram': return <Send size={18} />;
-    case 'tiktok': return (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5" />
-      </svg>
-    );
-    default: return <Share2 size={18} />;
-  }
-}
+};
 

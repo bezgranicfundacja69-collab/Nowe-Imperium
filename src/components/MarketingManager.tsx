@@ -14,7 +14,10 @@ import {
   DollarSign,
   Cpu,
   Mail,
-  Instagram
+  Instagram,
+  Youtube,
+  Layout,
+  Video
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { cn } from '../lib/utils';
@@ -27,9 +30,11 @@ const CAMPAIGN_TEMPLATES = [
   { id: 't4', name: 'Newsletter Cold-Reach', type: 'Email', color: 'amber', reach: '1k+ Open', conversion: '12.4%' }
 ];
 
-export function MarketingManager() {
+import { ViewProps } from '../types/view';
+
+export function MarketingManager({ onNavigate, cart }: ViewProps) {
   const [isBotActive, setIsBotActive] = useState(true);
-  const [activeTab, setActiveTab] = useState<'strategy' | 'ads' | 'analytics'>('strategy');
+  const [activeTab, setActiveTab] = useState<'strategy' | 'ads' | 'creators' | 'analytics'>('strategy');
 
   return (
     <div className="space-y-12 pb-20">
@@ -46,7 +51,7 @@ export function MarketingManager() {
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-12">
           <div>
             <div className="inline-flex items-center gap-2 rounded-full bg-blue-500/20 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-blue-400 border border-blue-500/30 mb-8 font-mono backdrop-blur-md">
-              <Megaphone size={14} className="animate-bounce" /> OmniMarketing AI Director
+              <Megaphone size={14} className="animate-bounce" /> noweMarketing AI Director
             </div>
             <h1 className="text-4xl font-black text-white mb-6 sm:text-7xl italic leading-tight tracking-tighter">
               Marketing <br /> <span className="text-blue-400">Manager AI</span>
@@ -71,17 +76,17 @@ export function MarketingManager() {
         </div>
       </div>
 
-      <div className="flex bg-slate-100 p-2 rounded-3xl w-fit border border-slate-200">
-         {(['strategy', 'ads', 'analytics'] as const).map((tab) => (
+      <div className="flex bg-slate-100 p-2 rounded-3xl w-fit border border-slate-200 overflow-x-auto max-w-full">
+         {(['strategy', 'ads', 'creators', 'analytics'] as const).map((tab) => (
            <button
              key={tab}
              onClick={() => setActiveTab(tab)}
              className={cn(
-               "px-8 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all",
+               "px-8 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap",
                activeTab === tab ? "bg-white text-blue-600 shadow-md" : "text-slate-400 hover:text-slate-600"
              )}
            >
-             {tab === 'strategy' ? 'Strategia AI' : tab === 'ads' ? 'Kampanie Płatne' : 'Analityka ROI'}
+             {tab === 'strategy' ? 'Strategia AI' : tab === 'ads' ? 'Kampanie Płatne' : tab === 'creators' ? 'Creator Kit' : 'Analityka ROI'}
            </button>
          ))}
       </div>
@@ -127,10 +132,70 @@ export function MarketingManager() {
             </section>
           )}
 
+          {activeTab === 'creators' && (
+            <section className="space-y-10">
+               <div className="bg-white rounded-[40px] border border-slate-100 p-10 shadow-sm relative overflow-hidden">
+                  <div className="absolute top-0 right-0 p-10 opacity-5">
+                    <Layout size={120} />
+                  </div>
+                  <h2 className="text-2xl font-black text-slate-900 mb-4 italic flex items-center gap-3">
+                    <Layout className="text-blue-600" size={28} /> Banery dla Sponsorów & Partnerów
+                  </h2>
+                  <p className="text-slate-500 text-sm italic mb-10 max-w-2xl">Zautomatyzowane aktywa wizualne. Prowadź profesjonalną komunikację na swoich kanałach social media z gotowymi banerami noweimperium.</p>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                     <CreatorAssetCard 
+                        icon={<Youtube size={24} />} 
+                        title="YouTube Banner Kit" 
+                        dimensions="2560 x 1440 px" 
+                        desc="Zoptymalizowane nagłówki kanałów z Twoim ID partnera."
+                        image="https://images.unsplash.com/photo-1574680077534-7546cb993f41?auto=format&fit=crop&q=80&w=800"
+                     />
+                     <CreatorAssetCard 
+                        icon={<Video size={24} />} 
+                        title="TikTok / Shorts Overlay" 
+                        dimensions="1080 x 1920 px" 
+                        desc="Dynamiczne nakładki AI do Twoich krótkich form wideo."
+                        image="https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?auto=format&fit=crop&q=80&w=800"
+                     />
+                     <CreatorAssetCard 
+                        icon={<Instagram size={24} />} 
+                        title="Instagram Stories Pack" 
+                        dimensions="1080 x 1920 px" 
+                        desc="Estetyczne szablony do promowania produktów i okazji."
+                        image="https://images.unsplash.com/photo-1611162616305-c69b3fa7fbe0?auto=format&fit=crop&q=80&w=800"
+                     />
+                     <CreatorAssetCard 
+                        icon={<Monitor size={24} />} 
+                        title="Twitch / Live Overlay" 
+                        dimensions="1920 x 1080 px" 
+                        desc="Profesjonalna ramka i alerty dla Twoich transmisji."
+                        image="https://images.unsplash.com/photo-1614850523296-d8c1af93d400?auto=format&fit=crop&q=80&w=800"
+                     />
+                  </div>
+               </div>
+
+               <div className="bg-slate-900 rounded-[48px] p-10 md:p-16 text-white text-center relative overflow-hidden">
+                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,rgba(59,130,246,0.3),transparent)]" />
+                  <Sparkles size={48} className="mx-auto mb-8 text-blue-400 animate-pulse" />
+                  <h3 className="text-3xl md:text-5xl font-black italic mb-6 tracking-tighter">AI Custom Brand Generator</h3>
+                  <p className="text-slate-400 text-lg max-w-2xl mx-auto mb-10 font-medium italic">Wygeneruj unikalny baner ze swoim logotypem lub twarzą, wkomponowany w estetykę noweimperium Prestige.</p>
+                  <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                    <button className="px-10 py-5 bg-white text-slate-900 rounded-2xl font-black text-xs uppercase tracking-widest hover:scale-105 transition-transform">
+                      Wgraj Swoje Logo / Avatar
+                    </button>
+                    <button className="px-10 py-5 bg-blue-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-blue-500 shadow-xl shadow-blue-600/20">
+                      Generuj przez nowe-Vision
+                    </button>
+                  </div>
+               </div>
+            </section>
+          )}
+
           {activeTab === 'ads' && (
             <section className="bg-white rounded-[40px] border border-slate-100 p-10 shadow-sm">
                <h2 className="text-2xl font-black text-slate-900 mb-10 italic flex items-center gap-3">
-                  <Zap className="text-blue-600" size={28} /> Reklamy Omni-Paid
+                  <Zap className="text-blue-600" size={28} /> Reklamy nowe-Paid
                </h2>
                <div className="bg-slate-900 rounded-3xl p-8 text-white mb-8 border border-white/5 shadow-2xl relative overflow-hidden">
                   <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(59,130,246,0.2),transparent)]" />
@@ -157,12 +222,12 @@ export function MarketingManager() {
         <aside className="lg:col-span-4 space-y-8">
           <div className="bg-white rounded-[40px] border border-slate-100 p-8 shadow-sm">
              <h3 className="font-black text-slate-900 mb-6 flex items-center gap-2 italic uppercase tracking-tighter">
-                <Cpu size={20} className="text-blue-600" /> OmniCore Marketing Node
+                <Cpu size={20} className="text-blue-600" /> noweCore Marketing Node
              </h3>
              <div className="space-y-6">
                 <StatItem label="Aktywne Kampanie" value="12" delta="Stan Optymalny" positive />
                 <StatItem label="Średni CPC AI" value="0.12 PLN" delta="-15% vs Rynek" positive />
-                <StatItem label="Omni-Score" value="98/100" delta="Top Strateg" positive />
+                <StatItem label="nowe-Score" value="98/100" delta="Top Strateg" positive />
              </div>
           </div>
 
@@ -218,6 +283,30 @@ function IntegrationIcon({ icon, active }: { icon: any, active?: boolean }) {
          {icon}
       </div>
    );
+}
+
+function CreatorAssetCard({ icon, title, dimensions, desc, image }: any) {
+  return (
+    <div className="group rounded-[32px] border border-slate-100 bg-white shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all overflow-hidden flex flex-col h-full">
+      <div className="h-48 overflow-hidden relative">
+        <img src={image} alt={title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 to-transparent" />
+        <div className="absolute bottom-4 left-6 flex items-center gap-2 text-white">
+          <div className="h-8 w-8 rounded-lg bg-white/20 backdrop-blur-md flex items-center justify-center">{icon}</div>
+          <span className="text-[10px] font-black uppercase tracking-widest">{dimensions}</span>
+        </div>
+      </div>
+      <div className="p-8 flex-1 flex flex-col">
+        <h3 className="text-xl font-black text-slate-900 mb-3 italic">{title}</h3>
+        <p className="text-slate-500 text-xs italic mb-8 font-medium leading-relaxed">{desc}</p>
+        <div className="mt-auto pt-6 border-t border-slate-50">
+          <button className="w-full py-4 rounded-xl font-black text-[10px] uppercase tracking-widest border border-slate-200 text-slate-600 hover:bg-blue-600 hover:text-white hover:border-blue-600 transition-all flex items-center justify-center gap-2">
+            Pobierz Pakiet <ArrowRight size={14} />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 function StatItem({ label, value, delta, positive }: any) {

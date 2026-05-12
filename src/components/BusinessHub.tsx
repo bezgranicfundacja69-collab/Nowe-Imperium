@@ -28,7 +28,7 @@ const DEPARTMENTS = [
     id: 'advertising', 
     title: 'Dział Baner Reklamowy', 
     icon: Layout, 
-    desc: 'Profesjonalne kampanie reklamowe i widoczność Twojej marki w sieci OmniMarket.',
+    desc: 'Profesjonalne kampanie reklamowe i widoczność Twojej marki w sieci noweimperium.',
     color: 'bg-blue-50 text-blue-600',
     stats: '150k+ Wyświetleń/mc',
     img: 'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&q=80&w=800'
@@ -163,8 +163,8 @@ const NEW_DEPARTMENTS = [
     img: 'https://images.unsplash.com/photo-1553729459-efe14ef6055d?auto=format&fit=crop&q=80&w=800'
   },
   { 
-    id: 'omni-bots', 
-    title: 'OmniBot Node', 
+    id: 'nowe-bots', 
+    title: 'noweBot Node', 
     icon: Bot, 
     desc: 'Autonomiczne zarządzanie, zamawianie i promowanie produktów. Twoje boty 24/7.',
     color: 'bg-blue-900 text-white',
@@ -173,12 +173,14 @@ const NEW_DEPARTMENTS = [
   }
 ];
 
-interface BusinessHubProps {
+import { ViewProps } from '../types/view';
+
+interface BusinessHubProps extends ViewProps {
   onCategorySelect?: (cat: string, sub: string) => void;
   onViewChange?: (view: any) => void;
 }
 
-export function BusinessHub({ onCategorySelect, onViewChange }: BusinessHubProps) {
+export function BusinessHub({ onCategorySelect, onViewChange, onNavigate, cart }: BusinessHubProps) {
   const [activeTab, setActiveTab] = useState<'all' | 'finance' | 'innovation'>('all');
 
   return (
@@ -219,7 +221,7 @@ export function BusinessHub({ onCategorySelect, onViewChange }: BusinessHubProps
                 if (dept.id === 'affiliate-bot') return onViewChange?.('affiliate-bot');
                 if (dept.id === 'marketing-manager') return onViewChange?.('marketing-manager');
                 if (dept.id === 'ready-businesses') return onViewChange?.('ready-businesses');
-                if (dept.id === 'omni-bots') return onViewChange?.('omni-bots');
+                if (dept.id === 'nowe-bots') return onViewChange?.('nowe-bots');
                 
                 const subMap: any = {
                     'investors': 'investors',
@@ -266,7 +268,7 @@ export function BusinessHub({ onCategorySelect, onViewChange }: BusinessHubProps
             <div className="absolute top-0 right-0 -mr-8 -mt-8 h-32 w-32 rounded-full bg-white/10 blur-2xl group-hover:scale-150 transition-transform duration-700" />
             <div className="relative z-10 flex flex-col h-full justify-between">
                 <div>
-                    <h3 className="text-2xl font-black mb-2">OmniMatch AI Investors</h3>
+                    <h3 className="text-2xl font-black mb-2">noweMatch AI Investors</h3>
                     <p className="text-indigo-100 text-sm font-medium max-w-sm">Nasz system AI dopasuje Twój projekt do najlepszych inwestorów i funduszy dotacyjnych w 60 sekund.</p>
                 </div>
                 <button className="mt-8 px-8 py-4 bg-white text-indigo-600 rounded-2xl font-black text-xs uppercase tracking-widest hover:scale-105 transition-transform flex items-center justify-center gap-2 w-fit">

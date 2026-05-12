@@ -7,15 +7,15 @@ import { getAIAssistantResponse } from '../services/aiService';
 export function SiteAssistant() {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<{ role: 'user' | 'assistant'; content: string }[]>([
-    { role: 'assistant', content: 'Witaj! Jestem Twoim OmniAgentem. Jak mogę Ci dzisiaj pomóc w zarabianiu lub zakupach?' }
+    { role: 'assistant', content: 'Witaj! Jestem Twoim noweAgentem. Jak mogę Ci dzisiaj pomóc w zarabianiu lub zakupach?' }
   ]);
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    (window as any).toggleOmniAgent = () => setIsOpen(prev => !prev);
-    return () => { delete (window as any).toggleOmniAgent; };
+    (window as any).togglenoweAgent = () => setIsOpen(prev => !prev);
+    return () => { delete (window as any).togglenoweAgent; };
   }, []);
 
   useEffect(() => {
@@ -33,7 +33,7 @@ export function SiteAssistant() {
     setIsTyping(true);
 
     try {
-      const response = await getAIAssistantResponse(userMessage, "Jesteś pływającym asystentem na stronie OmniMarket AI. Pomagasz nawigować, szukać okazji i wyjaśniasz automatyzację.");
+      const response = await getAIAssistantResponse(userMessage, "Jesteś pływającym asystentem na stronie noweimperium AI. Pomagasz nawigować, szukać okazji i wyjaśniasz automatyzację.");
       setMessages(prev => [...prev, { role: 'assistant', content: response || "🤖 Przepraszam, ale nie otrzymałem odpowiedzi od modułu AI. Spróbuj ponownie." }]);
     } catch (err: any) {
       // getAIAssistantResponse already uses handleGeminiError and returns a string, 
@@ -64,7 +64,7 @@ export function SiteAssistant() {
                   <Bot size={20} className="animate-pulse" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-black uppercase tracking-widest">OmniAgent AI</h3>
+                  <h3 className="text-sm font-black uppercase tracking-widest">noweAgent AI</h3>
                   <div className="flex items-center gap-1">
                     <div className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
                     <span className="text-[10px] font-bold text-slate-400">Online • 24/7 Support</span>
@@ -95,7 +95,7 @@ export function SiteAssistant() {
               ))}
               {isTyping && (
                 <div className="bg-white border border-slate-100 text-slate-400 p-3 rounded-2xl rounded-tl-none w-fit text-xs font-bold animate-pulse flex items-center gap-2">
-                  <Sparkles size={12} /> OmniAgent myśli...
+                  <Sparkles size={12} /> noweAgent myśli...
                 </div>
               )}
 

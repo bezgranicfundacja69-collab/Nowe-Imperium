@@ -17,14 +17,16 @@ import { motion } from 'motion/react';
 import { useState } from 'react';
 import { cn } from '../lib/utils';
 
-export function AIHelpView() {
+import { ViewProps } from '../types/view';
+
+export function AIHelpView({ onNavigate, cart }: ViewProps) {
   const [searchQuery, setSearchQuery] = useState('');
 
   const HELP_TOPICS = [
     { 
       title: 'Jak zacząć?', 
       icon: Zap, 
-      desc: 'Szybki start w ekosystemie OmniMarket. Konfiguracja portfela i pierwsza oferta.',
+      desc: 'Szybki start w ekosystemie noweimperium. Konfiguracja portfela i pierwsza oferta.',
       color: 'bg-blue-50 text-blue-600'
     },
     { 
@@ -42,7 +44,7 @@ export function AIHelpView() {
     { 
       title: 'Bezpieczeństwo', 
       icon: ShieldCheck, 
-      desc: 'Twoje dane i finanse są chronione przez OmniShield AI. Dowiedz się jak.',
+      desc: 'Twoje dane i finanse are chronione przez noweShield AI. Dowiedz się jak.',
       color: 'bg-rose-50 text-rose-600'
     }
   ];
@@ -55,7 +57,7 @@ export function AIHelpView() {
         </div>
         <div className="relative z-10 max-w-3xl">
           <div className="inline-flex items-center gap-2 rounded-full bg-blue-500/20 px-4 py-1 text-xs font-bold uppercase tracking-widest text-blue-400 border border-blue-500/30 mb-8 font-mono">
-            <Sparkles size={14} className="animate-spin-slow" /> OmniHelp AI
+            <Sparkles size={14} className="animate-spin-slow" /> noweHelp AI
           </div>
           <h1 className="text-4xl font-black mb-6 leading-tight sm:text-7xl italic">
             Centrum <br /><span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400">Pomocy AI</span>
@@ -100,6 +102,57 @@ export function AIHelpView() {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         <div className="lg:col-span-8 space-y-8">
+          <section className="bg-white rounded-[48px] p-8 md:p-12 border border-slate-100 shadow-sm relative overflow-hidden">
+             <div className="absolute top-0 right-0 p-8 opacity-10">
+                <Zap size={120} className="text-blue-600" />
+             </div>
+             <h2 className="text-2xl font-black text-slate-900 mb-8 flex items-center gap-3 relative z-10">
+               <Zap className="text-blue-600" /> Jak zacząć? - Szybki Start
+             </h2>
+             
+             <div className="grid gap-6 relative z-10">
+                {[
+                  { 
+                    step: "01", 
+                    title: "Rejestracja i Profil", 
+                    desc: "Załóż konto i uzupełnij podstawowe dane profilowe, aby budować zaufanie w społeczności." 
+                  },
+                  { 
+                    step: "02", 
+                    title: "Konfiguracja Portfela", 
+                    desc: "Przejdź do 'Mój Portfel', aby ustawić walutę rozliczeniową i zabezpieczyć swoje przyszłe zyski." 
+                  },
+                  { 
+                    step: "03", 
+                    title: "Wystaw Pierwszą Ofertę", 
+                    desc: "Kliknij 'Wystaw Ofertę' w panelu Sprzedawcy. Nasze AI wyręczy Cię w tworzeniu profesjonalnego opisu." 
+                  },
+                  { 
+                    step: "04", 
+                    title: "Aktywacja noweBot Node", 
+                    desc: "Uruchom swojego pierwszego agenta AI, który będzie czuwał nad Twoim biznesem 24/7." 
+                  }
+                ].map((step, i) => (
+                  <div key={i} className="flex gap-6 group">
+                     <div className="flex-shrink-0 w-12 h-12 rounded-2xl bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600 font-black text-lg">
+                        {step.step}
+                     </div>
+                     <div className="pt-2">
+                        <h3 className="font-bold text-slate-900 mb-1 group-hover:text-blue-600 transition-colors">{step.title}</h3>
+                        <p className="text-slate-500 text-sm italic">{step.desc}</p>
+                     </div>
+                  </div>
+                ))}
+             </div>
+             
+             <div className="mt-10 p-6 rounded-3xl bg-blue-600 text-white flex flex-col sm:flex-row items-center justify-between gap-6">
+                <p className="font-bold text-sm italic">Czujesz się gotowy? Zacznij zarabiać już teraz!</p>
+                <button className="px-8 py-3 bg-white text-blue-600 rounded-xl font-black text-xs uppercase tracking-widest hover:scale-105 transition-transform shadow-lg">
+                   Otwórz Panel Sprzedawcy
+                </button>
+             </div>
+          </section>
+
           <section className="bg-white rounded-[48px] p-8 md:p-12 border border-slate-100 shadow-sm">
              <h2 className="text-2xl font-black text-slate-900 mb-8 flex items-center gap-3">
                <BookOpen className="text-blue-600" /> Najczęściej czytane
@@ -145,7 +198,7 @@ export function AIHelpView() {
                   </motion.div>
                </div>
             </div>
-            <p className="mt-4 text-xs font-bold text-slate-600 text-center">Przewodnik po ekosystemie OmniMarket (1:45)</p>
+            <p className="mt-4 text-xs font-bold text-slate-600 text-center">Przewodnik po ekosystemie noweimperium (1:45)</p>
           </div>
         </div>
       </div>

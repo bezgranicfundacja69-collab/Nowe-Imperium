@@ -29,13 +29,15 @@ import {
 } from 'lucide-react';
 import { cn, formatPrice } from '../lib/utils';
 
-interface ChatViewProps {
+import { ViewProps } from '../types/view';
+
+interface ChatViewProps extends ViewProps {
   onBack: () => void;
   initialListingId?: string;
   initialSellerId?: string;
 }
 
-export function ChatView({ onBack, initialListingId, initialSellerId }: ChatViewProps) {
+export function ChatView({ onBack, initialListingId, initialSellerId, onNavigate, cart }: ChatViewProps) {
   const { user } = useAuth();
   const [conversations, setConversations] = useState<any[]>([]);
   const [activeConversation, setActiveConversation] = useState<any>(null);
@@ -82,6 +84,8 @@ export function ChatView({ onBack, initialListingId, initialSellerId }: ChatView
           // But wait, it might have been created by the "Send Message" action already
         }
       }
+    }, (error) => {
+      handleFirestoreError(error, OperationType.LIST, 'conversations');
     });
 
     return () => unsubscribe();
@@ -105,6 +109,8 @@ export function ChatView({ onBack, initialListingId, initialSellerId }: ChatView
         ...doc.data()
       }));
       setMessages(msgs);
+    }, (error) => {
+      handleFirestoreError(error, OperationType.LIST, `conversations/${activeConversation.id}/messages`);
     });
 
     return () => unsubscribe();
@@ -271,7 +277,7 @@ export function ChatView({ onBack, initialListingId, initialSellerId }: ChatView
                       <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Szyfrowana Rozmowa</span>
                    </div>
                    <div className="text-center space-y-2">
-                       <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest border-b border-slate-200 pb-1">OmniMarket AI Bezpieczeństwo</p>
+                       <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest border-b border-slate-200 pb-1">noweimperium AI Bezpieczeństwo</p>
                        <p className="text-[9px] text-slate-300 font-semibold max-w-xs mx-auto italic">Nigdy nie podawaj haseł ani kodów BLIK. Transakcje przeprowadzaj tylko przez platformę.</p>
                    </div>
                 </div>
@@ -335,7 +341,7 @@ export function ChatView({ onBack, initialListingId, initialSellerId }: ChatView
               <div className="h-24 w-24 bg-white rounded-[40px] shadow-sm border border-slate-100 flex items-center justify-center mx-auto mb-8 text-blue-600">
                 <MessageSquare size={40} />
               </div>
-              <h3 className="text-xl font-black text-slate-900 mb-2">OmniChat AI</h3>
+              <h3 className="text-xl font-black text-slate-900 mb-2">noweChat AI</h3>
               <p className="text-sm text-slate-500 leading-relaxed">Wybierz rozmowę z listy, aby zacząć czatować z użytkownikami. Twoje rozmowy są chronione przez AI.</p>
             </div>
           )}

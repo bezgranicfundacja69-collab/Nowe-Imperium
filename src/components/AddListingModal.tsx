@@ -27,35 +27,43 @@ export function AddListingModal({ isOpen, onClose }: AddListingModalProps) {
     category: 'electronics',
     subcategory: '',
     location: '',
-    type: 'product' as 'product' | 'service'
+    videoUrl: '',
+    type: 'product' as 'product' | 'service',
+    dealType: 'sale' as 'sale' | 'exchange' | 'both'
   });
 
   const selectedCategory = CATEGORIES.find(c => c.id === formData.category);
 
   const handleAiDescription = async () => {
-    if (!formData.title) return;
+    if (!formData.title || aiLoading) return;
     setAiLoading(true);
-    const prompt = `Napisz profesjonalny, sprzedażowy opis dla produktu: "${formData.title}" w kategorii ${formData.category}. Opis powinien być krótki, konkretny i zachęcający.`;
-    const response = await getAIAssistantResponse(prompt);
-    if (response) {
-      setFormData(prev => ({ ...prev, description: response }));
+    try {
+      const prompt = `Napisz profesjonalny, sprzedażowy opis dla produktu: "${formData.title}" w kategorii ${formData.category}. Opis powinien być krótki, konkretny i zachęcający.`;
+      const response = await getAIAssistantResponse(prompt);
+      if (response) {
+        setFormData(prev => ({ ...prev, description: response }));
+      }
+    } finally {
+      setAiLoading(false);
     }
-    setAiLoading(false);
   };
 
   const handleAiImage = async () => {
-    if (!formData.title) return;
+    if (!formData.title || aiLoading) return;
     setAiLoading(true);
-    const img = await generateProductImage(formData.title);
-    if (img) {
-      setGeneratedImage(img);
+    try {
+      const img = await generateProductImage(formData.title);
+      if (img) {
+        setGeneratedImage(img);
+      }
+    } finally {
+      setAiLoading(false);
     }
-    setAiLoading(false);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user) return;
+    if (!user || loading || aiLoading) return;
     setLoading(true);
 
     try {
@@ -63,7 +71,7 @@ export function AddListingModal({ isOpen, onClose }: AddListingModalProps) {
         ...formData,
         price: parseFloat(formData.price),
         sellerId: user.uid,
-        sellerName: user.displayName,
+        sellerName: user.displayName || user.email?.split('@')[0],
         status: 'active',
         image: generatedImage || `https://picsum.photos/seed/${Math.random()}/800/600`,
         createdAt: serverTimestamp(),
@@ -99,7 +107,7 @@ export function AddListingModal({ isOpen, onClose }: AddListingModalProps) {
         >
           <div className="flex h-20 items-center justify-between border-b border-slate-100 px-10">
             <h2 className="text-2xl font-black text-slate-900 flex items-center gap-3">
-              <Sparkles className="text-blue-600 animate-pulse" /> Wystaw z OmniAI
+              <Sparkles className="text-blue-600 animate-pulse" /> Wystaw z noweAI
             </h2>
             <button onClick={onClose} className="text-slate-400 hover:text-slate-600 transition-colors">
               <X size={24} />
@@ -114,7 +122,7 @@ export function AddListingModal({ isOpen, onClose }: AddListingModalProps) {
                         <Bot size={20} />
                       </div>
                       <div>
-                        <p className="text-xs font-black text-blue-600 uppercase tracking-widest">Podpowiedź OmniAgenta</p>
+                        <p className="text-xs font-black text-blue-600 uppercase tracking-widest">Podpowiedź noweAgenta</p>
                         <p className="text-[10px] text-blue-500 font-medium italic">Wpisz tytuł, a ja pomogę Ci z opisem i zdjęciem!</p>
                       </div>
                    </div>
@@ -126,10 +134,14 @@ export function AddListingModal({ isOpen, onClose }: AddListingModalProps) {
                   <input
                     required
                     type="text"
+                    disabled={loading || aiLoading}
                     value={formData.title}
                     onChange={(e) => setFormData({...formData, title: e.target.value})}
                     placeholder="np. Profesjonalny Traktor John Deere"
-                    className="w-full rounded-2xl bg-slate-50 border-none px-6 py-4 text-sm font-bold focus:ring-2 focus:ring-blue-500/20"
+                    className={cn(
+                      "w-full rounded-2xl bg-slate-50 border-none px-6 py-4 text-sm font-bold focus:ring-2 focus:ring-blue-500/20",
+                      (loading || aiLoading) && "opacity-50 cursor-not-allowed"
+                    )}
                   />
                 </div>
 
@@ -145,16 +157,28 @@ export function AddListingModal({ isOpen, onClose }: AddListingModalProps) {
                         className="w-full rounded-2xl bg-slate-50 border-none px-6 py-4 text-sm font-bold focus:ring-2 focus:ring-blue-500/20"
                     />
                    </div>
-                   <div>
-                    <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest block mb-2">Lokalizacja</label>
-                    <input
-                      required
-                      type="text"
-                      value={formData.location}
-                      onChange={(e) => setFormData({...formData, location: e.target.value})}
-                      placeholder="Miasto"
-                      className="w-full rounded-2xl bg-slate-50 border-none px-6 py-4 text-sm font-bold focus:ring-2 focus:ring-blue-500/20"
-                    />
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest block mb-2">Lokalizacja</label>
+                      <input
+                        required
+                        type="text"
+                        value={formData.location}
+                        onChange={(e) => setFormData({...formData, location: e.target.value})}
+                        placeholder="Miasto"
+                        className="w-full rounded-2xl bg-slate-50 border-none px-6 py-4 text-sm font-bold focus:ring-2 focus:ring-blue-500/20"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest block mb-2 text-indigo-600">Video URL (YT/TikTok)</label>
+                      <input
+                        type="text"
+                        value={formData.videoUrl}
+                        onChange={(e) => setFormData({...formData, videoUrl: e.target.value})}
+                        placeholder="Link do filmu"
+                        className="w-full rounded-2xl bg-indigo-50 border-none px-6 py-4 text-sm font-bold focus:ring-2 focus:ring-indigo-500/20"
+                      />
+                    </div>
                   </div>
                 </div>
 
@@ -217,11 +241,44 @@ export function AddListingModal({ isOpen, onClose }: AddListingModalProps) {
                     <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest block mb-2">Kategoria</label>
                     <select
                       value={formData.category}
-                      onChange={(e) => setFormData({...formData, category: e.target.value})}
+                      onChange={(e) => setFormData({...formData, category: e.target.value, subcategory: ''})}
                       className="w-full rounded-2xl bg-slate-50 border-none px-6 py-4 text-sm font-bold focus:ring-2 focus:ring-blue-500/20"
                     >
                       {CATEGORIES.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                     </select>
+                  </div>
+                  {selectedCategory?.subcategories && (
+                    <div>
+                      <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest block mb-2">Podkategoria</label>
+                      <select
+                        value={formData.subcategory}
+                        onChange={(e) => setFormData({...formData, subcategory: e.target.value})}
+                        className="w-full rounded-2xl bg-slate-50 border-none px-6 py-4 text-sm font-bold focus:ring-2 focus:ring-blue-500/20"
+                      >
+                        <option value="">Wybierz podkategorię</option>
+                        {selectedCategory.subcategories.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+                      </select>
+                    </div>
+                  )}
+                  <div>
+                    <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest block mb-2">Forma Transakcji</label>
+                    <div className="grid grid-cols-3 gap-2">
+                       {['sale', 'exchange', 'both'].map((type) => (
+                         <button 
+                           key={type}
+                           type="button"
+                           onClick={() => setFormData({...formData, dealType: type as any})}
+                           className={cn(
+                             "py-3 rounded-xl text-[9px] font-black uppercase tracking-widest border transition-all",
+                             formData.dealType === type 
+                               ? "bg-blue-600 text-white border-blue-600 shadow-lg shadow-blue-600/20" 
+                               : "bg-white text-slate-600 border-slate-100 hover:border-blue-200"
+                           )}
+                         >
+                           {type === 'sale' ? 'Sprzedaż' : type === 'exchange' ? 'Zamiana' : 'Obie formy'}
+                         </button>
+                       ))}
+                    </div>
                   </div>
                   <div>
                     <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest block mb-2">Typ Oferty</label>
@@ -250,16 +307,22 @@ export function AddListingModal({ isOpen, onClose }: AddListingModalProps) {
               <button 
                 type="button"
                 onClick={onClose}
-                className="flex-1 rounded-[24px] border border-slate-200 py-5 text-sm font-black text-slate-600 hover:bg-slate-50 transition-all uppercase tracking-widest"
+                disabled={loading || aiLoading}
+                className="flex-1 rounded-[24px] border border-slate-200 py-5 text-sm font-black text-slate-600 hover:bg-slate-50 transition-all uppercase tracking-widest disabled:opacity-50"
               >
                 Anuluj
               </button>
               <button 
                 type="submit"
                 disabled={loading || aiLoading}
-                className="flex-[2] rounded-[24px] bg-blue-600 py-5 text-sm font-black text-white shadow-2xl shadow-blue-600/20 transition-all hover:bg-blue-700 disabled:opacity-50 uppercase tracking-widest"
+                className="flex-[2] rounded-[24px] bg-blue-600 py-5 text-sm font-black text-white shadow-2xl shadow-blue-600/20 transition-all hover:bg-blue-700 disabled:opacity-50 uppercase tracking-widest flex items-center justify-center gap-2"
               >
-                {loading ? <Loader2 className="mx-auto animate-spin" size={20} /> : 'Wystaw Ofertę OmniAI'}
+                {loading ? (
+                  <>
+                    <Loader2 className="animate-spin" size={20} />
+                    Przetwarzanie...
+                  </>
+                ) : 'Wystaw Ofertę noweAI'}
               </button>
             </div>
           </form>

@@ -16,7 +16,9 @@ import { motion } from 'motion/react';
 import { cn } from '../lib/utils';
 import { useState } from 'react';
 
-export function AIAutomationHub() {
+import { ViewProps } from '../types/view';
+
+export function AIAutomationHub({ onNavigate, cart }: ViewProps) {
   const [scrapingUrl, setScrapingUrl] = useState('');
   const [isScraping, setIsScraping] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -58,7 +60,7 @@ export function AIAutomationHub() {
         </div>
         <div className="relative z-10 max-w-3xl">
           <div className="inline-flex items-center gap-2 rounded-full bg-blue-500/20 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-blue-400 border border-blue-500/30 mb-8 font-mono backdrop-blur-md">
-            <Bot size={14} className="animate-bounce" /> OmniMarket AI Automation System
+            <Bot size={14} className="animate-bounce" /> noweimperium AI Automation System
           </div>
           <h1 className="text-5xl font-black text-white mb-6 sm:text-7xl italic leading-tight tracking-tighter">
             Pobieraj Produkty <br /> <span className="text-blue-500">Automatycznie</span>
@@ -72,8 +74,12 @@ export function AIAutomationHub() {
                   type="text" 
                   value={scrapingUrl}
                   onChange={(e) => setScrapingUrl(e.target.value)}
+                  disabled={isScraping}
                   placeholder="Wklej link z AliExpress lub Temu..."
-                  className="w-full bg-white/10 border-none rounded-2xl pl-12 pr-4 py-5 text-white placeholder:text-slate-500 focus:ring-2 focus:ring-blue-500 transition-all font-mono text-sm"
+                  className={cn(
+                    "w-full bg-white/10 border-none rounded-2xl pl-12 pr-4 py-5 text-white placeholder:text-slate-500 focus:ring-2 focus:ring-blue-500 transition-all font-mono text-sm",
+                    isScraping && "opacity-50 cursor-not-allowed"
+                  )}
                 />
              </div>
              <button 

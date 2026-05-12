@@ -15,7 +15,9 @@ import {
 import { motion } from 'motion/react';
 import { cn } from '../lib/utils';
 
-export function OurAppsView() {
+import { ViewProps } from '../types/view';
+
+export function OurAppsView({ onNavigate, cart }: ViewProps) {
   const APPS = [
     {
       id: 'alpinator',
@@ -28,8 +30,8 @@ export function OurAppsView() {
       badge: 'TOP SELLER'
     },
     {
-      id: 'omnibot',
-      name: 'OmniBot Node',
+      id: 'nowebot',
+      name: 'noweBot Node',
       category: 'Sztuczna Inteligencja',
       desc: 'Twój osobisty agent AI operujący w chmurze 24/7. Zarządza wiadomościami, negocjacjami i logistyką Twojego biznesu.',
       icon: Bot,
@@ -49,7 +51,7 @@ export function OurAppsView() {
     },
     {
       id: 'scraping-node',
-      name: 'OmniScraper Pro',
+      name: 'noweScraper Pro',
       category: 'Data Mining',
       desc: 'Pobiera dane o produktach, cenach i trendach z dowolnej strony internetowej. Idealny do badania konkurencji.',
       icon: Database,
@@ -59,17 +61,18 @@ export function OurAppsView() {
     },
     {
       id: 'mobile-app',
-      name: 'OmniMarket Mobile',
+      name: 'noweimperium Mobile',
       category: 'Aplikacja Mobilna',
       desc: 'Zarządzaj swoim imperium AI z poziomu telefonu. Powiadomienia push o każdej sprzedaży i automatyczna odpowiedź AI.',
       icon: Smartphone,
+      image: 'https://images.unsplash.com/photo-1551650975-87deedd944c3?auto=format&fit=crop&q=80&w=800',
       stats: 'iOS / Android',
       color: 'from-rose-500 to-pink-600',
       badge: 'VIVA'
     },
     {
       id: 'media-node',
-      name: 'OmniMedia Hub',
+      name: 'noweMedia Hub',
       category: 'Treści AI',
       desc: 'Generator profesjonalnych filmów i newsów branżowych. Automatycznie publikuje na Twoich kanałach społecznościowych.',
       icon: Globe,
@@ -92,7 +95,7 @@ export function OurAppsView() {
         
         <div className="relative z-10 max-w-3xl">
           <div className="inline-flex items-center gap-2 rounded-full bg-blue-500/20 px-4 py-1 text-xs font-bold uppercase tracking-widest text-blue-400 border border-blue-500/30 mb-8 font-mono">
-            <AppWindow size={14} /> OmniMarket Ecosystem
+            <AppWindow size={14} /> noweimperium Ecosystem
           </div>
           <h1 className="text-5xl font-black mb-6 leading-tight sm:text-8xl italic tracking-tighter uppercase">
             Nasze <br /><span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400">Aplikacje</span>
@@ -123,6 +126,18 @@ export function OurAppsView() {
             className="group relative bg-white rounded-[40px] border border-slate-100 shadow-sm overflow-hidden hover:shadow-2xl transition-all cursor-pointer"
           >
             <div className={cn("h-2 bg-gradient-to-r", app.color)} />
+            
+            {app.image && (
+              <div className="aspect-video w-full overflow-hidden relative">
+                <img 
+                  src={app.image} 
+                  alt={app.name} 
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
+                  referrerPolicy="no-referrer"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-900/40 to-transparent" />
+              </div>
+            )}
             
             <div className="p-8">
               <div className="flex justify-between items-start mb-6">
@@ -164,7 +179,7 @@ export function OurAppsView() {
          <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-10">
             <div className="max-w-xl">
                <h2 className="text-3xl font-black italic uppercase tracking-tighter mb-4">Pełna Integracja Ekosystemu</h2>
-               <p className="text-slate-400 font-medium italic">Wszystkie nasze aplikacje komunikują się ze sobą w czasie rzeczywistym. Alpinator znajduje produkt, Marketing Manager tworzy kampanię, a OmniBot obsługuje sprzedaż. Wszystko w jednym panelu.</p>
+               <p className="text-slate-400 font-medium italic">Wszystkie nasze aplikacje komunikują się ze sobą w czasie rzeczywistym. Alpinator znajduje produkt, Marketing Manager tworzy kampanię, a noweBot obsługuje sprzedaż. Wszystko w jednym panelu.</p>
             </div>
             <button className="px-10 py-5 bg-white text-slate-900 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-blue-500 hover:text-white transition-all shadow-2xl flex items-center gap-3">
                Zintegruj Swoje Biznesy <ShieldCheck size={20} />

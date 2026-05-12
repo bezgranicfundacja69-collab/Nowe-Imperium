@@ -1,33 +1,64 @@
 @import "tailwindcss";
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Space+Grotesk:wght@300;700&family=Playfair+Display:ital,wght@0,900;1,900&family=Libre+Baskerville:ital@0;1&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui;
-  --font-display: "Space Grotesk", sans-serif;
-  --font-serif: "Libre Baskerville", serif;
-  --font-editorial: "Playfair Display", serif;
+  --font-display: "Outfit", sans-serif;
+  --font-technical: "Space Grotesk", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
   
-  --color-brand-neon: #00f2ff;
-  --color-brand-glow: #7000ff;
-  
-  --animate-spin-slow: spin 4s linear infinite;
+  --color-prestige-50: #f8fafc;
+  --color-prestige-100: #f1f5f9;
+  --color-prestige-200: #e2e8f0;
+  --color-prestige-300: #cbd5e1;
+  --color-prestige-400: #94a3b8;
+  --color-prestige-500: #64748b;
+  --color-prestige-600: #475569;
+  --color-prestige-700: #334155;
+  --color-prestige-800: #1e293b;
+  --color-prestige-900: #0f172a;
+  --color-prestige-950: #020617;
+
+  --color-accent-indigo: #4338ca;
+  --color-accent-emerald: #059669;
+  --color-accent-amber: #d97706;
 }
 
 @layer base {
   body {
-    @apply bg-slate-50 text-slate-900 antialiased font-sans;
+    @apply bg-prestige-50 text-prestige-900 antialiased font-sans selection:bg-accent-indigo/10 selection:text-accent-indigo;
   }
   
-  h1, h2, h3, h4, .font-black {
-    @apply font-black tracking-tighter;
-    font-family: inherit;
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display font-semibold tracking-tight;
+  }
+
+  .font-mono {
+    @apply font-mono;
   }
 }
 
-.glow-text {
-  text-shadow: 0 0 20px rgba(0, 242, 255, 0.4);
+@utility glass-card {
+  @apply bg-white/70 backdrop-blur-md border border-white/20 shadow-sm transition-all duration-300;
+  &:hover {
+    @apply bg-white/80 border-white/40 shadow-md;
+  }
 }
 
-.aggressive-gradient {
-  background: linear-gradient(135deg, #000000 0%, #0f172a 100%);
+@utility prestige-button {
+  @apply inline-flex items-center justify-center px-6 py-3 rounded-2xl font-display font-bold text-sm tracking-wide uppercase shadow-sm transition-all active:scale-95;
+}
+
+@utility prestige-button-primary {
+  @apply inline-flex items-center justify-center px-6 py-3 rounded-2xl font-display font-bold text-sm tracking-wide uppercase shadow-sm transition-all active:scale-95;
+  @apply bg-prestige-950 text-white hover:bg-prestige-800 hover:shadow-lg;
+}
+
+@utility prestige-button-secondary {
+  @apply inline-flex items-center justify-center px-6 py-3 rounded-2xl font-display font-bold text-sm tracking-wide uppercase shadow-sm transition-all active:scale-95;
+  @apply bg-white text-prestige-700 border border-prestige-200 hover:bg-prestige-50 hover:border-prestige-300;
+}
+
+@utility premium-gradient {
+  background: radial-gradient(circle at top left, var(--color-prestige-50), var(--color-prestige-100));
 }

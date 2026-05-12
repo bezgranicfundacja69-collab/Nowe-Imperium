@@ -11,22 +11,23 @@ import {
   Pause,
   AlertCircle,
   Activity,
-  ArrowRight
+  ArrowRight,
+  Share2
 } from 'lucide-react';
 import { cn } from '../lib/utils';
-import { getOmniBots, OmniBot } from '../services/botService';
+import { getnoweBots, noweBot } from '../services/botService';
 import { useAuth } from '../hooks/useAuth';
 
-export function OmniBotsHomeSummary({ onManageBots }: { onManageBots: () => void }) {
+export function NoweBotsHomeSummary({ onManageBots }: { onManageBots: () => void }) {
   const { user } = useAuth();
-  const [bots, setBots] = useState<OmniBot[]>([]);
+  const [bots, setBots] = useState<noweBot[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function load() {
       if (!user) return;
       setLoading(true);
-      const data = await getOmniBots(user.uid);
+      const data = await getnoweBots(user.uid);
       setBots(data);
       setLoading(false);
     }
@@ -39,10 +40,10 @@ export function OmniBotsHomeSummary({ onManageBots }: { onManageBots: () => void
     switch (type) {
       case 'price_watcher': return <Search size={18} />;
       case 'auto_responder': return <MessageSquare size={18} />;
-      case 'inventory_sync': return <Package size={18} />;
-      case 'ad_optimizer': return <TrendingUp size={18} />;
-      case 'lead_gen': return <Users size={18} />;
+      case 'order_fulfillment': return <Package size={18} />;
+      case 'marketplace_scout': return <Search size={18} />;
       case 'social_manager': return <Share2 size={18} />;
+      case 'dropship_automator': return <Activity size={18} />;
       default: return <Cpu size={18} />;
     }
   };
@@ -65,7 +66,7 @@ export function OmniBotsHomeSummary({ onManageBots }: { onManageBots: () => void
           <div className="inline-flex items-center gap-2 px-3 py-1 bg-blue-500/10 rounded-full border border-blue-500/20 text-[10px] font-black uppercase tracking-widest text-blue-600 mb-2">
             <Activity size={12} className="animate-pulse" /> Live Status
           </div>
-          <h3 className="text-2xl font-black text-slate-900 tracking-tighter uppercase italic">OmniBots Manager</h3>
+          <h3 className="text-2xl font-black text-slate-900 tracking-tighter uppercase italic">noweimperium Bots</h3>
         </div>
         <button 
           onClick={onManageBots}
@@ -75,8 +76,8 @@ export function OmniBotsHomeSummary({ onManageBots }: { onManageBots: () => void
         </button>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 relative z-10">
-        {bots.map((bot) => (
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-4 relative z-10">
+        {bots.slice(0, 8).map((bot) => (
           <div 
             key={bot.id} 
             className="group p-4 bg-slate-50 hover:bg-white rounded-[24px] border border-transparent hover:border-slate-100 transition-all hover:shadow-xl"

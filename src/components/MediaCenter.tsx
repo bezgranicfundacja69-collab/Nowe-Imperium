@@ -29,7 +29,9 @@ const NEWS = [
   }
 ];
 
-export function MediaCenter() {
+import { ViewProps } from '../types/view';
+
+export function MediaCenter({ onNavigate, cart }: ViewProps) {
   const [isGenerating, setIsGenerating] = useState(false);
   const today = new Date().toLocaleDateString('pl-PL', { day: 'numeric', month: 'long', year: 'numeric' });
 
@@ -39,7 +41,7 @@ export function MediaCenter() {
       const doc = new jsPDF() as any;
       doc.setFontSize(22);
       doc.setTextColor(15, 23, 42); // slate-900
-      doc.text('OmniMarket AI - Gazeta Biznesowa', 20, 20);
+      doc.text('noweimperium AI - Gazeta Biznesowa', 20, 20);
       doc.setFontSize(10);
       doc.setTextColor(100, 116, 139); // slate-500
       doc.text(`Wydanie z dnia: ${new Date().toLocaleDateString('pl-PL')}`, 20, 28);
@@ -65,8 +67,8 @@ export function MediaCenter() {
       });
       doc.setFontSize(8);
       doc.setTextColor(148, 163, 184); // slate-400
-      doc.text('© 2026 OmniMarket AI. Wygenerowano automatycznie przez OmniAgenta.', 20, 280);
-      doc.save('OmniGazeta_Wydanie.pdf');
+      doc.text('© 2026 noweimperium AI. Wygenerowano automatycznie przez noweAgenta.', 20, 280);
+      doc.save('noweimperiumGazeta_Wydanie.pdf');
     } catch (error) {
       console.error('PDF Generation error:', error);
     } finally {
@@ -81,11 +83,11 @@ export function MediaCenter() {
         <div className="flex flex-col items-center">
           <div className="w-full flex items-center justify-between border-b border-slate-200 pb-2 mb-6 text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 font-sans">
             <span>Vol. LXIV — No. 12</span>
-            <span className="hidden md:inline">OmiMarket AI Ecosystem — Intelligence Hub</span>
+            <span className="hidden md:inline">noweimperium AI Ecosystem — Intelligence Hub</span>
             <span>{today}</span>
           </div>
           <h1 className="font-editorial text-7xl md:text-9xl text-slate-900 italic font-black tracking-tighter leading-none mb-4 text-center">
-            Omni<span className="text-blue-600">Gazeta</span>
+            nowe<span className="text-blue-600">imperium</span> Gazeta
           </h1>
           <div className="w-full h-1 bg-slate-900 mt-2"></div>
           <div className="w-full flex items-center justify-between py-2 border-b border-slate-900 text-xs font-bold text-slate-800 italic">
@@ -127,7 +129,7 @@ export function MediaCenter() {
           <div className="flex items-center gap-4 py-4 border-t border-slate-100">
             <div className="h-10 w-10 bg-slate-100 rounded-full flex items-center justify-center font-editorial italic text-lg text-slate-400">AI</div>
             <div>
-              <p className="text-[10px] font-black uppercase tracking-widest text-slate-900">Autor: OmniAgent 2.0</p>
+              <p className="text-[10px] font-black uppercase tracking-widest text-slate-900">Autor: noweAgent 2.0</p>
               <p className="text-[9px] font-bold text-slate-400 uppercase">Główny Analityk Danych</p>
             </div>
             <button className="ml-auto text-[10px] font-black uppercase tracking-widest text-blue-600 flex items-center gap-2 group/btn">
@@ -169,7 +171,7 @@ export function MediaCenter() {
           <div className="bg-slate-50 border-2 border-dashed border-slate-200 p-8 text-center rounded-sm">
             <TrendingUp size={32} className="mx-auto text-slate-300 mb-4" />
             <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2">Miejsce na Twoją Reklamę</p>
-            <p className="text-[9px] font-medium text-slate-400 mb-4 italic">Dotrzyj do miliona sprzedawców OmniMarket</p>
+            <p className="text-[9px] font-medium text-slate-400 mb-4 italic">Dotrzyj do miliona sprzedawców noweimperium</p>
             <button className="w-full py-2 bg-slate-200 text-slate-600 rounded-sm text-[9px] font-black uppercase tracking-widest hover:bg-blue-600 hover:text-white transition-all">
               Kontakt z Redakcją
             </button>
@@ -192,6 +194,131 @@ export function MediaCenter() {
                </div>
             </div>
           ))}
+        </div>
+      </section>
+      {/* Video Hub Section - YouTube & TikTok */}
+      <section className="mt-20 pt-10 border-t-4 border-slate-900">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-6 mb-12">
+          <div>
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-red-600/10 rounded-full border border-red-600/20 text-[10px] font-black uppercase tracking-widest text-red-600 mb-2">
+              <Play size={12} fill="currentColor" /> nowe TV Live
+            </div>
+            <h3 className="text-4xl font-black text-slate-900 tracking-tighter uppercase italic">Video Hub & Monetizacja</h3>
+          </div>
+          <p className="text-xs font-bold text-slate-500 max-w-xs text-right italic">
+            Zarabiaj na swoich treściach. Programy partnerskie dla firm i twórców indywidualnych.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+          {/* YouTube Section */}
+          <div className="bg-white rounded-[40px] border border-slate-100 p-8 shadow-sm hover:shadow-xl transition-all">
+            <div className="flex items-center justify-between mb-8">
+              <div className="flex items-center gap-3">
+                <div className="h-12 w-12 rounded-2xl bg-red-600 text-white flex items-center justify-center">
+                  <Play size={24} fill="currentColor" />
+                </div>
+                <div>
+                  <h4 className="text-xl font-black italic tracking-tighter">noweimperium TV</h4>
+                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Dla Firm i Edukacji</span>
+                </div>
+              </div>
+              <div className="text-right">
+                <span className="text-xs font-black text-emerald-600 uppercase tracking-widest block">Aktywna Monetyzacja</span>
+                <span className="text-[10px] font-bold text-slate-400">RPM: ~12.50 zł</span>
+              </div>
+            </div>
+            
+            <div className="aspect-video bg-slate-100 rounded-3xl mb-6 overflow-hidden relative group">
+               <img src="https://images.unsplash.com/photo-1611162617474-5b21e879e113?auto=format&fit=crop&q=80&w=800" alt="YT" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+               <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button className="h-16 w-16 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center text-white border border-white/30">
+                     <Play size={32} fill="white" />
+                  </button>
+               </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+               <div className="p-4 bg-slate-50 rounded-2xl">
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Dla Firm</p>
+                  <p className="text-sm font-bold text-slate-900 leading-tight">Video-wizytówki i szkolenia produktowe.</p>
+               </div>
+               <div className="p-4 bg-slate-50 rounded-2xl">
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Dla Twórców</p>
+                  <p className="text-sm font-bold text-slate-900 leading-tight">Revenue share z reklam noweimperium.</p>
+                </div>
+             </div>
+          </div>
+
+          {/* TikTok Section */}
+          <div className="bg-slate-900 rounded-[40px] text-white p-8 shadow-2xl relative overflow-hidden">
+            <div className="absolute top-0 right-0 p-12 opacity-10 rotate-12 pointer-events-none">
+               <TrendingUp size={160} />
+            </div>
+
+            <div className="flex items-center justify-between mb-8 relative z-10">
+              <div className="flex items-center gap-3">
+                <div className="h-12 w-12 rounded-2xl bg-white text-black flex items-center justify-center">
+                   <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.06-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 2.89 3.5 2.53 1.53-.3 2.7-1.71 2.73-3.14.01-4.03.01-8.05.02-12.08z" />
+                   </svg>
+                </div>
+                <div>
+                  <h4 className="text-xl font-black italic tracking-tighter">TikTok Creator Hub</h4>
+                  <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Wiralowa Promocja Ofert</span>
+                </div>
+              </div>
+              <div className="text-right relative z-10">
+                <span className="text-xs font-black text-blue-400 uppercase tracking-widest block">Viral Scaling</span>
+                <span className="text-[10px] font-bold text-slate-500">Boost: +450% zasięgu</span>
+              </div>
+            </div>
+
+            <div className="space-y-6 relative z-10">
+               <div className="p-6 rounded-3xl bg-white/5 border border-white/10 italic">
+                  <p className="text-sm font-bold text-slate-200 leading-relaxed">
+                    Automatycznie generujemy krótkie wideo (TikTok/Reels) z Twoich ofert. 
+                    Płać tylko za realną konwersję i zamówienia, nie za puste kliki.
+                  </p>
+               </div>
+               
+               <div className="flex flex-wrap gap-3">
+                  {['UGC Creator', 'Affiliate Ads', 'Product Clips'].map(tag => (
+                    <span key={tag} className="px-4 py-2 bg-white/10 rounded-full text-[10px] font-black uppercase tracking-widest">
+                       {tag}
+                    </span>
+                  ))}
+               </div>
+
+               <button className="w-full py-4 bg-white text-slate-900 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-blue-400 transition-all flex items-center justify-center gap-2">
+                  <TrendingUp size={16} /> Rozpocznij Kampanię Wideo
+               </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Sponsor Banners Section */}
+      <section className="mt-20 pt-10 border-t-4 border-slate-900">
+        <h3 className="text-4xl font-black text-slate-900 tracking-tighter uppercase italic mb-10">Sponsor Kits & Banners</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+           {[
+             { name: 'YouTube Pack', platform: 'YouTube', dims: '2560x1440', color: 'bg-red-50' },
+             { name: 'TikTok Overlay', platform: 'TikTok', dims: '1080x1920', color: 'bg-slate-50' },
+             { name: 'Instagram Kit', platform: 'Instagram', dims: '1080x1080', color: 'bg-purple-50' },
+             { name: 'Partner Banner', platform: 'Web', dims: '728x90', color: 'bg-blue-50' },
+           ].map((kit) => (
+             <div key={kit.name} className={cn("p-6 rounded-[32px] border border-slate-100 transition-all hover:shadow-xl hover:-translate-y-1", kit.color)}>
+                <div className="h-10 w-10 bg-white rounded-xl shadow-sm flex items-center justify-center mb-6 text-slate-900 border border-slate-50 font-black text-xs">
+                  {kit.platform.substring(0, 2)}
+                </div>
+                <h4 className="font-black text-slate-900 mb-1">{kit.name}</h4>
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-6">{kit.dims}</p>
+                <button className="w-full py-3 bg-white text-slate-900 rounded-xl text-[9px] font-black uppercase tracking-widest border border-slate-100 hover:bg-slate-900 hover:text-white transition-all">
+                  Pobierz Zasoby
+                </button>
+             </div>
+           ))}
         </div>
       </section>
     </div>

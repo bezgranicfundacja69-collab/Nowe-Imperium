@@ -1,13 +1,15 @@
 import { Mail, MessageSquare, Phone, MapPin, Send, HelpCircle } from 'lucide-react';
 import { motion } from 'motion/react';
 
-export function ContactView() {
+import { ViewProps } from '../types/view';
+
+export function ContactView({ onNavigate, cart }: ViewProps) {
   return (
     <div className="space-y-12 pb-20">
       <div className="relative overflow-hidden rounded-[48px] bg-white border border-slate-100 p-8 shadow-sm sm:p-20 text-center">
         <div className="absolute top-0 left-0 -ml-20 -mt-20 h-64 w-64 rounded-full bg-blue-500/5 blur-3xl" />
         <h1 className="text-4xl font-black text-slate-900 mb-4 sm:text-7xl">Potrzebujesz <span className="text-blue-600">Pomocy?</span></h1>
-        <p className="text-slate-500 text-lg max-w-2xl mx-auto font-medium">Nasz zespół wsparcia OmniMarket AI jest dostępny 24/7, aby odpowiedzieć na Twoje pytania.</p>
+        <p className="text-slate-500 text-lg max-w-2xl mx-auto font-medium">Nasz zespół wsparcia noweimperium AI jest dostępny 24/7, aby odpowiedzieć na Twoje pytania.</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
@@ -24,9 +26,9 @@ export function ContactView() {
             </div>
           </div>
 
-          <ContactCard icon={<Mail className="text-blue-600" />} title="E-mail" detail="kontakt@omnimarket.ai" sub="Odpowiadamy w 15 minut" />
+          <ContactCard icon={<Mail className="text-blue-600" />} title="E-mail" detail="kontakt@noweimperium.ai" sub="Odpowiadamy w 15 minut" />
           <ContactCard icon={<MessageSquare className="text-indigo-600" />} title="Live Czat AI" detail="Dostępny Online" sub="Natychmiastowe rozwiązanie problemu" />
-          <ContactCard icon={<Phone className="text-teal-600" />} title="Infolinia" detail="+48 800 OMNI AI" sub="Dla Partnerów Premium" />
+          <ContactCard icon={<Phone className="text-teal-600" />} title="Infolinia" detail="+48 800 NOWE AI" sub="Dla Partnerów Premium" />
         </div>
 
         <form className="lg:col-span-8 bg-white rounded-[40px] border border-slate-100 p-8 sm:p-12 shadow-sm space-y-6">

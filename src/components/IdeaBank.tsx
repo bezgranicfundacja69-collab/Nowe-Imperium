@@ -53,7 +53,9 @@ const IDEAS = [
   }
 ];
 
-export function IdeaBank() {
+import { ViewProps } from '../types/view';
+
+export function IdeaBank({ onNavigate, cart }: ViewProps) {
   const [filter, setFilter] = useState('all');
 
   return (
@@ -71,7 +73,7 @@ export function IdeaBank() {
         <div className="relative z-10 flex flex-col md:flex-row md:items-end justify-between gap-8">
           <div>
             <div className="inline-flex items-center gap-2 rounded-full bg-amber-500/20 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-amber-400 border border-amber-500/30 mb-8 font-mono backdrop-blur-md">
-              <Lightbulb size={14} className="animate-pulse" /> OmniMarket Bank Pomysłów
+              <Lightbulb size={14} className="animate-pulse" /> noweimperium Bank Pomysłów
             </div>
             <h1 className="text-4xl font-black text-white mb-6 sm:text-6xl italic leading-tight tracking-tighter">
               Kapitał <br /> <span className="text-amber-400">Intelektualny</span>

@@ -23,7 +23,8 @@ import {
   GraduationCap,
   Palmtree,
   Lightbulb,
-  Workflow
+  Workflow,
+  Tractor
 } from 'lucide-react';
 
 export interface SubCategory {
@@ -191,6 +192,64 @@ export const CATEGORIES: Category[] = [
       { id: 'auto-listing', name: 'Automatyczne Wystawianie' },
       { id: 'stock-sync', name: 'Synchronizacja Magazynu' },
       { id: 'analysis', name: 'Analiza Konkurencji AI' }
+    ]
+  },
+  {
+    id: 'real-estate',
+    name: 'Nieruchomości',
+    icon: Home,
+    subcategories: [
+      { id: 'apartments', name: 'Mieszkania' },
+      { id: 'houses', name: 'Domy' },
+      { id: 'plots', name: 'Działki' },
+      { id: 'commercial', name: 'Lokale Użytkowe' },
+      { id: 'rent', name: 'Wynajem' }
+    ]
+  },
+  {
+    id: 'jobs',
+    name: 'Praca',
+    icon: Briefcase,
+    subcategories: [
+      { id: 'it-jobs', name: 'IT i Programowanie' },
+      { id: 'marketing-jobs', name: 'Marketing i PR' },
+      { id: 'sales-jobs', name: 'Sprzedaż i Logistyka' },
+      { id: 'remote', name: 'Praca Zdalna' },
+      { id: 'manual', name: 'Praca Fizyczna' }
+    ]
+  },
+  {
+    id: 'pets',
+    name: 'Zwierzęta',
+    icon: Dog,
+    subcategories: [
+      { id: 'dogs', name: 'Psy i Akcesoria' },
+      { id: 'cats', name: 'Koty i Akcesoria' },
+      { id: 'birds', name: 'Ptaki' },
+      { id: 'fish', name: 'Akwarystyka' }
+    ]
+  },
+  {
+    id: 'agriculture',
+    name: 'Rolnictwo',
+    icon: Tractor,
+    subcategories: [
+      { id: 'machines', name: 'Maszyny Rolnicze' },
+      { id: 'crops', name: 'Płody Rolne' },
+      { id: 'livestock', name: 'Zwierzęta Hodowlane' },
+      { id: 'fertilizers', name: 'Nawozy' }
+    ]
+  },
+  {
+    id: 'video-media',
+    name: 'Wideo & Media',
+    icon: Monitor,
+    subcategories: [
+      { id: 'youtube', name: 'YouTube - Kanały i Promocja' },
+      { id: 'tiktok', name: 'TikTok - Monetyzacja' },
+      { id: 'shorts', name: 'Shorts & Reels' },
+      { id: 'production', name: 'Produkcja Filmowa' },
+      { id: 'influencers', name: 'Współpraca z Twórcami' }
     ]
   },
   {

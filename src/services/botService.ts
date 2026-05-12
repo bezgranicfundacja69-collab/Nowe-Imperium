@@ -7,14 +7,14 @@ import {
   updateDoc,
   serverTimestamp 
 } from 'firebase/firestore';
-import { db } from '../lib/firebase';
+import { db, handleFirestoreError, OperationType } from '../lib/firebase';
 
 export type BotStatus = 'active' | 'paused' | 'error' | 'idle';
 
-export interface OmniBot {
+export interface noweBot {
   id: string;
   name: string;
-  type: 'price_watcher' | 'auto_responder' | 'inventory_sync' | 'ad_optimizer' | 'lead_gen' | 'social_manager';
+  type: 'price_watcher' | 'auto_responder' | 'inventory_sync' | 'ad_optimizer' | 'lead_gen' | 'social_manager' | 'dropship_automator' | 'order_fulfillment' | 'marketplace_scout';
   status: BotStatus;
   lastAction: string;
   description: string;
@@ -29,9 +29,9 @@ export interface OmniBot {
  * Pobiera boty przypisane do użytkownika.
  * Jeśli pusto, zwraca zestaw startowych botów (MOCK dla demo).
  */
-export async function getOmniBots(userId: string): Promise<OmniBot[]> {
+export async function getnoweBots(userId: string): Promise<noweBot[]> {
   try {
-    const botsRef = collection(db, 'omnibots');
+    const botsRef = collection(db, 'nowebots');
     const q = query(botsRef, where('userId', '==', userId));
     const snapshot = await getDocs(q);
     
@@ -104,11 +104,11 @@ export async function getOmniBots(userId: string): Promise<OmniBot[]> {
         },
         {
           id: 'bot-5',
-          name: 'Omni Social Master',
+          name: 'nowe Social Master',
           type: 'social_manager',
           status: 'active',
           lastAction: 'Zaplanowano 5 postów na LinkedIn i Instagram',
-          description: 'Multikanałowa automatyzacja social media. Publikuje treści, odpowiada na komentarze i buduje społeczność na Facebooku, Instagramie, LinkedIn i Telegramie.',
+          description: 'Multikanałowa automatyzacja social media. Publikuje treści, odpowiada na komentarze i buduje społeczność na Facebooku, Instagramie, LinkedIn i Telegramie przy użyciu AI.',
           stats: [
             { label: 'Obsłużone kanały', value: '4' },
             { label: 'Wzrost zaangażowania', value: '+124%' }
@@ -117,20 +117,68 @@ export async function getOmniBots(userId: string): Promise<OmniBot[]> {
           uptime: '15d 8h',
           actionsCount: 2450,
           userId
+        },
+        {
+          id: 'bot-6',
+          name: 'Dropship AI Automator',
+          type: 'dropship_automator',
+          status: 'active',
+          lastAction: 'Wygenerowano 25 nowych ofert z hurtowni X',
+          description: 'Automatycznie skanuje wybrane hurtownie, pobiera zdjęcia, tłumaczy opisy za pomocą AI i wystawia produkty na marketplace z Twoją marżą.',
+          stats: [
+            { label: 'Pobrane produkty', value: '450' },
+            { label: 'Przetłumaczone opisy', value: '100%' }
+          ],
+          efficiency: 95,
+          uptime: '3d 12h',
+          actionsCount: 890,
+          userId
+        },
+        {
+          id: 'bot-7',
+          name: 'Smart Order Fulfilled',
+          type: 'order_fulfillment',
+          status: 'active',
+          lastAction: 'Złożono zamówienie w hurtowni (Order #A-123)',
+          description: 'Gdy klient kupi produkt u Ciebie, bot automatycznie zamawia go w hurtowni i wprowadza dane klienta do wysyłki. Pełny proces bez Twojej ingerencji.',
+          stats: [
+            { label: 'Przetworzone rano', value: '12' },
+            { label: 'Średni czas realizacji', value: '5 min' }
+          ],
+          efficiency: 98,
+          uptime: '10d 2h',
+          actionsCount: 320,
+          userId
+        },
+        {
+          id: 'bot-8',
+          name: 'Marketplace Scout (imperiumHunter)',
+          type: 'marketplace_scout',
+          status: 'active',
+          lastAction: 'Znaleziono trend: Akcesoria do Grilla (+200% popytu)',
+          description: 'Skanuje Amazon, eBay i Allegro w poszukiwaniu luk rynkowych i trendów o wysokiej marży. Podpowiada co warto teraz wystawić.',
+          stats: [
+            { label: 'Znalezione okazje', value: '18' },
+            { label: 'Analizowane dane', value: '2.5 GB/d' }
+          ],
+          efficiency: 88,
+          uptime: '20d 5h',
+          actionsCount: 5400,
+          userId
         }
       ];
     }
     
-    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as OmniBot[];
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as noweBot[];
   } catch (error) {
-    console.error("Error fetching OmniBots:", error);
+    handleFirestoreError(error, OperationType.GET, 'nowebots');
     return [];
   }
 }
 
 export async function toggleBotStatus(botId: string, currentStatus: BotStatus) {
   const newStatus: BotStatus = currentStatus === 'active' ? 'paused' : 'active';
-  const botRef = doc(db, 'omnibots', botId);
+  const botRef = doc(db, 'nowebots', botId);
   
   try {
     await updateDoc(botRef, {
@@ -139,7 +187,22 @@ export async function toggleBotStatus(botId: string, currentStatus: BotStatus) {
     });
     return true;
   } catch (error) {
-    console.error("Error toggling bot status:", error);
+    handleFirestoreError(error, OperationType.UPDATE, `nowebots/${botId}`);
+    return false;
+  }
+}
+
+export async function updateBotAction(botId: string, actionName: string) {
+  const botRef = doc(db, 'nowebots', botId);
+  try {
+    await updateDoc(botRef, {
+      lastAction: actionName,
+      updatedAt: serverTimestamp(),
+      actionsCount: serverTimestamp() // Simple increment simulation in rules/backend
+    });
+    return true;
+  } catch (error) {
+    handleFirestoreError(error, OperationType.UPDATE, `nowebots/${botId}`);
     return false;
   }
 }

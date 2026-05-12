@@ -80,8 +80,8 @@
       },
       "required": ["balance"]
     },
-    "OmniBot": {
-      "title": "OmniBot",
+    "noweBot": {
+      "title": "noweBot",
       "description": "An autonomous AI bot worker",
       "type": "object",
       "properties": {
@@ -95,11 +95,89 @@
         "lastAction": { "type": "string" }
       },
       "required": ["name", "type", "status", "userId"]
+    },
+    "CreditProfile": {
+      "title": "Credit Profile",
+      "description": "User's credit limits and score",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "creditLimit": { "type": "number" },
+        "availableCredit": { "type": "number" },
+        "creditScore": { "type": "number" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "creditLimit", "availableCredit"]
+    },
+    "LoanApplication": {
+      "title": "Loan Application",
+      "description": "A request for funding",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "amount": { "type": "number" },
+        "purpose": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "approved", "rejected", "disbursed"] },
+        "loanType": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "amount", "purpose", "status", "createdAt"]
+    },
+    "Notification": {
+      "title": "Notification",
+      "description": "A real-time alert for the user",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "title": { "type": "string" },
+        "message": { "type": "string" },
+        "listingId": { "type": "string" },
+        "type": { "type": "string", "enum": ["listing_alert", "system", "message"] },
+        "read": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "title", "message", "type", "read", "createdAt"]
+    },
+    "UserPreference": {
+      "title": "User Preference",
+      "description": "User's notification settings and search filters",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "subscribedCategories": { "type": "array", "items": { "type": "string" } },
+        "minPrice": { "type": "number" },
+        "maxPrice": { "type": "number" },
+        "keywords": { "type": "array", "items": { "type": "string" } },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "subscribedCategories", "updatedAt"]
+    },
+    "SellerStripeInfo": {
+      "title": "Seller Stripe Info",
+      "description": "Information about a seller's Stripe Connect account",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "stripeAccountId": { "type": "string" },
+        "chargesEnabled": { "type": "boolean" },
+        "payoutsEnabled": { "type": "boolean" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "stripeAccountId", "updatedAt"]
     }
   },
   "firestore": {
-    "/omnibots/{botId}": {
-      "schema": { "$ref": "#/entities/OmniBot" },
+    "/notifications/{notifId}": {
+      "schema": { "$ref": "#/entities/Notification" },
+      "description": "User notifications"
+    },
+    "/userPreferences/{userId}": {
+      "schema": { "$ref": "#/entities/UserPreference" },
+      "description": "User notification preferences"
+    },
+    "/nowebots/{botId}": {
+      "schema": { "$ref": "#/entities/noweBot" },
       "description": "User's AI automation bots"
     },
     "/listings/{listingId}": {
@@ -118,6 +196,14 @@
       "schema": { "$ref": "#/entities/Wallet" },
       "description": "User wallets"
     },
+    "/creditProfiles/{userId}": {
+      "schema": { "$ref": "#/entities/CreditProfile" },
+      "description": "User credit profiles"
+    },
+    "/loanApplications/{appId}": {
+      "schema": { "$ref": "#/entities/LoanApplication" },
+      "description": "User loan applications"
+    },
     "/conversations/{convId}": {
       "schema": { "$ref": "#/entities/Conversation" },
       "description": "Chat conversations"
@@ -133,6 +219,10 @@
     "/transactions/{txId}": {
       "schema": { "$ref": "#/entities/Transaction" },
       "description": "User wallet transactions"
+    },
+    "/sellerStripeInfo/{userId}": {
+      "schema": { "$ref": "#/entities/SellerStripeInfo" },
+      "description": "Seller Stripe Connect account data"
     }
   }
 }

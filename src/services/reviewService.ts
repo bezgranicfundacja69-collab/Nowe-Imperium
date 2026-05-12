@@ -136,7 +136,8 @@ async function updateAverageRating(targetId: string, targetType: 'listing' | 'us
     try {
       await updateDoc(targetRef, {
         averageRating: average,
-        reviewCount: reviews.length
+        reviewCount: reviews.length,
+        updatedAt: serverTimestamp()
       });
     } catch (error) {
       handleFirestoreError(error, OperationType.UPDATE, targetDocPath);

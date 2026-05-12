@@ -16,8 +16,12 @@ service cloud.firestore {
       return isSignedIn() && request.auth.uid == userId;
     }
 
+    function isVerifiedUser() {
+      return isSignedIn();
+    }
+
     function isValidId(id) {
-      return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+      return id is string && id.size() > 0 && id.size() <= 128;
     }
 
     function incoming() {
@@ -28,147 +32,157 @@ service cloud.firestore {
       return resource.data;
     }
 
-    function isVerifiedUser() {
-      return isSignedIn() && (request.auth.token.email_verified == true || request.auth.token.firebase.sign_in_provider == 'google.com' || request.auth.token.email == 'arkadiusz.smyka@onet.pl');
-    }
-
     // --- Entity Validations ---
 
     function isValidListing(data) {
-      return data.keys().hasAll(['title', 'price', 'category', 'sellerId', 'createdAt', 'status']) &&
-             data.title is string && data.title.size() <= 200 &&
+      return data.keys().hasAll(['title', 'price', 'category', 'sellerId', 'status']) &&
+             data.title is string && data.title.size() <= 300 &&
              data.price is number && data.price >= 0 &&
-             data.category is string && data.category.size() <= 64 &&
              data.sellerId == request.auth.uid &&
-             data.status in ['active', 'sold', 'hidden'] &&
-             data.createdAt == request.time;
-    }
-
-    function isValidListingUpdate(data, prev) {
-      return data.title is string && data.title.size() <= 200 &&
-             data.price is number && data.price >= 0 &&
-             data.category is string && data.category.size() <= 64 &&
-             data.sellerId == prev.sellerId &&
-             data.createdAt == prev.createdAt &&
-             data.updatedAt == request.time;
+             data.status in ['active', 'sold', 'hidden'];
     }
 
     function isValidConversation(data) {
       return data.participants is list && 
-             data.participants.size() >= 2 && data.participants.size() <= 10 &&
-             request.auth.uid in data.participants &&
-             (data.updatedAt == request.time || data.updatedAt == null);
+             data.participants.size() >= 2 &&
+             request.auth.uid in data.participants;
     }
 
     function isValidMessage(data) {
       return data.senderId == request.auth.uid &&
-             data.text is string && data.text.size() <= 10000 &&
-             data.createdAt == request.time;
+             data.text is string && data.text.size() <= 5000;
     }
 
     function isValidTransaction(data) {
       return data.userId == request.auth.uid &&
              data.amount is number &&
-             data.type in ['deposit', 'withdrawal', 'sale', 'purchase'] &&
-             data.createdAt == request.time;
-    }
-
-    function isValidReview(data) {
-      return data.keys().hasAll(['reviewerId', 'reviewerName', 'targetId', 'targetType', 'rating', 'comment', 'createdAt']) &&
-             isValidId(data.targetId) &&
-             data.reviewerId == request.auth.uid &&
-             data.targetType in ['listing', 'user'] &&
-             data.rating is number && data.rating >= 1 && data.rating <= 5 &&
-             data.comment is string && data.comment.size() <= 2000 &&
-             data.createdAt == request.time;
+             data.type is string;
     }
 
     function isValidBot(data) {
       return data.userId == request.auth.uid &&
-             data.name is string && data.name.size() <= 100 &&
-             data.type in ['price_watcher', 'auto_responder', 'inventory_sync', 'ad_optimizer', 'lead_gen'] &&
+             data.name is string &&
              data.status in ['active', 'paused', 'error', 'idle'];
     }
 
-    // --- Collections ---
+    function isValidReview(data) {
+      return data.reviewerId == request.auth.uid &&
+             data.rating is number && data.rating >= 1 && data.rating <= 5;
+    }
 
-    match /omnibots/{botId} {
-      allow read: if isOwner(existing().userId);
-      allow create: if isVerifiedUser() && isValidBot(incoming()) && isValidId(botId);
-      allow update: if isOwner(existing().userId) && isValidBot(incoming());
+    function isValidCreditProfile(data) {
+      return data.userId == request.auth.uid &&
+             data.creditLimit is number &&
+             data.availableCredit is number;
+    }
+
+    function isValidLoanApplication(data) {
+      return data.userId == request.auth.uid &&
+             data.amount is number && data.amount > 0 &&
+             data.status in ['pending', 'approved', 'rejected', 'disbursed'];
+    }
+
+    function isValidNotification(data) {
+      return data.userId == request.auth.uid &&
+             data.title is string && data.message is string &&
+             data.type in ['listing_alert', 'system', 'message'] &&
+             data.read is bool;
+    }
+
+    function isValidPreference(data) {
+      return data.userId == request.auth.uid &&
+             data.subscribedCategories is list;
+    }
+
+    function isValidStripeInfo(data) {
+      return data.userId == request.auth.uid &&
+             data.stripeAccountId is string &&
+             data.stripeAccountId.size() <= 128;
+    }
+
+    // --- Collections ---
+    
+    match /notifications/{notifId} {
+      allow list: if isSignedIn() && (resource.data.userId == request.auth.uid);
+      allow get: if isSignedIn() && (existing().userId == request.auth.uid);
+      allow create: if isSignedIn() && isValidNotification(incoming());
+      allow update: if isOwner(existing().userId) && 
+                      incoming().diff(existing()).affectedKeys().hasOnly(['read']);
       allow delete: if isOwner(existing().userId);
     }
 
+    match /userPreferences/{userId} {
+      allow read, create, update: if isOwner(userId);
+    }
+
+    match /users/{userId} {
+      allow read: if true;
+      allow create, update: if isOwner(userId);
+      allow update: if isSignedIn() && (
+        incoming().diff(existing()).affectedKeys().hasOnly(['averageRating', 'reviewCount', 'rating', 'updatedAt'])
+      );
+    }
+
+    match /nowebots/{botId} {
+      allow read, update, delete: if isOwner(existing().userId);
+      allow create: if isSignedIn() && isValidBot(incoming());
+    }
+
     match /listings/{listingId} {
-      allow read: if true; // Public marketplace
-      allow create: if isVerifiedUser() && isValidListing(incoming()) && isValidId(listingId);
-      allow update: if isVerifiedUser() && (
-        // Case 1: Owner full update
-        (isOwner(existing().sellerId) && 
-         isValidListingUpdate(incoming(), existing()) &&
-         incoming().diff(existing()).affectedKeys().hasOnly(['title', 'description', 'price', 'category', 'subcategory', 'image', 'location', 'type', 'updatedAt', 'rating', 'ratingCount', 'averageRating', 'reviewCount', 'aiVerified', 'status', 'sellerName', 'images'])) ||
-        // Case 2: Public rating update (Increment only)
-        (incoming().diff(existing()).affectedKeys().hasOnly(['reviewCount', 'averageRating'])) ||
-        // Case 3: Public chat initiation summary update
-        (incoming().diff(existing()).affectedKeys().hasOnly(['lastMessage', 'updatedAt']))
+      allow read: if true;
+      allow create: if isSignedIn() && isValidListing(incoming());
+      allow update: if isSignedIn() && (
+        isOwner(existing().sellerId) ||
+        incoming().diff(existing()).affectedKeys().hasOnly(['reviewCount', 'averageRating', 'updatedAt', 'lastMessage', 'status'])
       );
       allow delete: if isOwner(existing().sellerId);
 
-      // Nested reviews for listings
       match /reviews/{reviewId} {
         allow read: if true;
-        allow create: if isVerifiedUser() && isValidReview(incoming()) && isValidId(reviewId);
+        allow create: if isSignedIn() && isValidReview(incoming());
       }
     }
 
     match /reviews/{reviewId} {
       allow read: if true;
-      allow create: if isVerifiedUser() && isValidReview(incoming()) && isValidId(reviewId);
-    }
-    
-    match /users/{userId} {
-      allow read: if true;
-      allow update: if isOwner(userId) || (isSignedIn() && incoming().diff(existing()).affectedKeys().hasOnly(['averageRating', 'reviewCount', 'rating']));
-      
-      match /reviews/{reviewId} {
-        allow read: if true;
-        allow create: if isVerifiedUser() && isValidReview(incoming()) && isValidId(reviewId);
-      }
+      allow create: if isSignedIn() && isValidReview(incoming());
     }
 
     match /wallets/{userId} {
-      allow read: if isOwner(userId);
-      allow create: if isOwner(userId) && (incoming().balance == 0 || incoming().balance <= 0.1);
-      allow update: if isOwner(userId) && 
-                      incoming().diff(existing()).affectedKeys().hasOnly(['balance', 'updatedAt']) &&
-                      // Limit the amount that can be earned per update to prevent mass spamming
-                      incoming().balance >= existing().balance &&
-                      incoming().balance <= existing().balance + 10.0; // 10 PLN max per update jump
+      allow read, create, update: if isOwner(userId);
     }
 
     match /conversations/{convId} {
-      allow get: if isVerifiedUser() && request.auth.uid in existing().participants && isValidId(convId);
-      allow list: if isVerifiedUser() && request.auth.uid in existing().participants;
-      allow create: if isVerifiedUser() && isValidConversation(incoming()) && isValidId(convId);
+      allow get: if isVerifiedUser() && request.auth.uid in existing().participants;
+      allow list: if isVerifiedUser() && request.auth.uid in resource.data.participants;
+      allow create: if isVerifiedUser() && isValidConversation(incoming());
       allow update: if isVerifiedUser() && request.auth.uid in existing().participants &&
-                      incoming().participants == existing().participants &&
-                      incoming().diff(existing()).affectedKeys().hasOnly(['lastMessage', 'updatedAt', 'listingId', 'listingTitle', 'listingImage']);
-    }
-
-    match /conversations/{convId}/messages/{msgId} {
-      // 1. The Master Gate: Verify parent conversation membership
-      function isParticipant() {
-        return request.auth.uid in get(/databases/$(database)/documents/conversations/$(convId)).data.participants;
+                      incoming().diff(existing()).affectedKeys().hasOnly(['lastMessage', 'updatedAt', 'participants']);
+                      
+      match /messages/{msgId} {
+        allow read: if isVerifiedUser() && request.auth.uid in get(/databases/$(database)/documents/conversations/$(convId)).data.participants;
+        allow create: if isVerifiedUser() && request.auth.uid in get(/databases/$(database)/documents/conversations/$(convId)).data.participants && isValidMessage(incoming());
       }
-
-      allow read: if isVerifiedUser() && isParticipant();
-      allow create: if isVerifiedUser() && isParticipant() && isValidMessage(incoming()) && isValidId(msgId);
     }
 
     match /transactions/{txId} {
-      allow get: if isVerifiedUser() && isOwner(existing().userId) && isValidId(txId);
-      allow list: if isVerifiedUser() && resource.data.userId == request.auth.uid;
-      allow create: if isVerifiedUser() && isValidTransaction(incoming()) && isValidId(txId);
+      allow get, list: if isVerifiedUser() && (resource.data.userId == request.auth.uid || existing().userId == request.auth.uid);
+      allow create: if isVerifiedUser() && isValidTransaction(incoming());
+    }
+
+    match /creditProfiles/{userId} {
+      allow read, create, update: if isOwner(userId);
+    }
+
+    match /loanApplications/{appId} {
+      allow read: if isSignedIn() && (resource.data.userId == request.auth.uid || existing().userId == request.auth.uid);
+      allow create: if isSignedIn() && isValidLoanApplication(incoming());
+      allow update: if isOwner(existing().userId) && isValidLoanApplication(incoming());
+      allow delete: if isOwner(existing().userId) && existing().status == 'pending';
+    }
+
+    match /sellerStripeInfo/{userId} {
+      allow read, write: if isOwner(userId);
     }
   }
 }

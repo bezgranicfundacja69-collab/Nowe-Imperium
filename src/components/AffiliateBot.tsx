@@ -16,6 +16,10 @@ import {
 import { motion } from 'motion/react';
 import { cn } from '../lib/utils';
 import { useState } from 'react';
+import { generateAffiliateContent } from '../services/aiService';
+import { addTransaction } from '../services/walletService';
+import { useAuth } from '../hooks/useAuth';
+import { toast } from 'sonner';
 
 const RECOMMENDED_OFFERS = [
   { id: 'o1', name: 'Suplementy Diety KETO', network: 'MyLead', commission: '45 PLN / CPS', conversion: '8.4%', trend: '+12%' },
@@ -26,26 +30,58 @@ const RECOMMENDED_OFFERS = [
   { id: 'o4', name: 'E-book: Dochód Pasywny', network: 'Internal', commission: '15 PLN / CPL', conversion: '15.8%', trend: '+18%' }
 ];
 
-export function AffiliateBot() {
+import { ViewProps } from '../types/view';
+
+export function AffiliateBot({ onNavigate, cart }: ViewProps) {
+  const { user } = useAuth();
   const [activeStrategy, setActiveStrategy] = useState('aggressive');
   const [isBotRunning, setIsBotRunning] = useState(true);
   const [generationOutput, setGenerationOutput] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
 
-  const generateContent = () => {
+  const generateContent = async () => {
     setIsGenerating(true);
     setGenerationOutput('');
-    const text = "🔥 OKAZJA ROKU! 🔥\n\nSzukasz sposobu na realny dochód pasywny w 2026? Sprawdź nasz najnowszy kurs AI Automatyzacji. \n\n✅ Dowiedz się jak klonować sukcesy.\n✅ Zautomatyzuj swoje social media.\n✅ Odbierz darmowy bonus na start!\n\nSprawdź tutaj: https://omni.link/aff-special-ai";
     
-    let i = 0;
-    const interval = setInterval(() => {
-      setGenerationOutput(prev => prev + text[i]);
-      i++;
-      if (i === text.length) {
-        clearInterval(interval);
-        setIsGenerating(false);
+    try {
+      const data = await generateAffiliateContent("AI Automatyzacja i Dochód Pasywny", activeStrategy as any);
+      
+      if (!data) throw new Error("Błąd generowania treści");
+
+      const fullText = `${data.title}\n\n${data.body}\n\n👉 ${data.call_to_action}: https://nowe.link/aff-special-ai\n\n${data.hashtags.join(' ')}`;
+      
+      let i = 0;
+      const interval = setInterval(() => {
+        setGenerationOutput(prev => prev + fullText[i]);
+        i++;
+        if (i === fullText.length) {
+          clearInterval(interval);
+          setIsGenerating(false);
+          
+          if (user) {
+            addTransaction(user.uid, 0.01, "AI Campaign Content Generation");
+            toast.success("Otrzymano 0.01 PLN za pracę AI Agenta!");
+          }
+        }
+      }, 10);
+    } catch (error) {
+      toast.error("Nie udało się wygenerować treści. Spróbuj ponownie.");
+      setIsGenerating(false);
+    }
+  };
+
+  const handlePublish = async () => {
+    if (!generationOutput) {
+      toast.error("Najpierw wygeneruj kampanię.");
+      return;
+    }
+    
+    if (user) {
+      const success = await addTransaction(user.uid, 0.50, "Affiliate Link Activation Bonus");
+      if (success) {
+        toast.success("Kampania opublikowana! Otrzymano bonus aktywacyjny 0.50 PLN.");
       }
-    }, 20);
+    }
   };
 
   return (
@@ -63,7 +99,7 @@ export function AffiliateBot() {
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-12">
           <div>
             <div className="inline-flex items-center gap-2 rounded-full bg-indigo-500/20 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-indigo-400 border border-indigo-500/30 mb-8 font-mono backdrop-blur-md">
-              <Bot size={14} className="animate-bounce" /> OmniAffiliate AI Agent v3.0
+              <Bot size={14} className="animate-bounce" /> noweAffiliate AI Agent v3.0
             </div>
             <h1 className="text-4xl font-black text-white mb-6 sm:text-7xl italic leading-tight tracking-tighter">
               Twój Bot <br /> <span className="text-indigo-400">Afiliacyjny</span>
@@ -126,7 +162,10 @@ export function AffiliateBot() {
                    >
                      <Zap size={16} /> Generuj Kampanię
                    </button>
-                   <button className="px-8 py-5 bg-slate-900 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-slate-800 transition-all flex items-center justify-center gap-2">
+                   <button 
+                    onClick={handlePublish}
+                    className="px-8 py-5 bg-slate-900 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-slate-800 transition-all flex items-center justify-center gap-2"
+                   >
                      <Share2 size={16} /> Publikuj Social Media
                    </button>
                 </div>
@@ -174,7 +213,7 @@ export function AffiliateBot() {
              <div className="h-14 w-14 bg-indigo-600/20 rounded-2xl flex items-center justify-center mb-6 border border-indigo-500/30">
                <DollarSign size={28} className="text-indigo-400" />
              </div>
-             <h3 className="text-2xl font-black mb-4 leading-tight italic">OmniAds Factoring</h3>
+             <h3 className="text-2xl font-black mb-4 leading-tight italic">nowe Ads Factoring</h3>
              <p className="text-slate-400 text-sm mb-8 leading-relaxed font-medium">Wypłać swoje zarobione prowizje natychmiast, bez czekania na rozliczenie przez sieć afiliacyjną.</p>
              <button className="w-full py-4 bg-indigo-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-indigo-500 transition-all shadow-lg shadow-indigo-600/30">
                 Wypłać Prowizję (Instant)
@@ -183,7 +222,7 @@ export function AffiliateBot() {
 
           <div className="bg-white rounded-[40px] border border-slate-100 p-8 shadow-sm">
              <h3 className="font-black text-slate-900 mb-6 flex items-center gap-2 italic uppercase tracking-tighter">
-                <PieChart size={20} className="text-indigo-600" /> OmniCore Analytics
+                <PieChart size={20} className="text-indigo-600" /> noweCore Analytics
              </h3>
              <div className="space-y-6">
                 <StatItem label="Kliknięcia Unikalne" value="4,250" delta="+15%" positive />
@@ -210,7 +249,7 @@ export function AffiliateBot() {
              <h3 className="text-xl font-black mb-4 italic">Tryb Ekspercki AI</h3>
              <p className="text-indigo-100 text-xs mb-8 leading-relaxed font-medium">Pozwól botowi na automatyczne licytowanie stawek CPC i optymalizację ROI Twoich kampanii.</p>
              <button className="w-full py-4 bg-white text-indigo-600 rounded-2xl font-black text-[10px] uppercase tracking-widest font-mono">
-                Aktywuj OmniScalability v4
+                Aktywuj noweScalability v4
              </button>
           </div>
         </aside>

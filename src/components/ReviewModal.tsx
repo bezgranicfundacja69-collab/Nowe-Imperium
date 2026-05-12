@@ -97,7 +97,7 @@ export function ReviewModal({ isOpen, onClose, targetId, targetType, targetTitle
                   </div>
                   <div>
                     <h3 className="text-2xl font-black text-slate-900 mb-2 italic">Dziękujemy!</h3>
-                    <p className="text-slate-500 font-medium italic">Twoja opinia została pomyślnie opublikowana i pomaga innym użytkownikom OmniMarket.</p>
+                    <p className="text-slate-500 font-medium italic">Twoja opinia została pomyślnie opublikowana i pomaga innym użytkownikom noweimperium.</p>
                   </div>
                 </div>
               ) : (

@@ -1,10 +1,11 @@
-import { MapPin, Star, ArrowRight, Bot, Sparkles, MessageSquare, Share2, CreditCard } from 'lucide-react';
+import { MapPin, Star, ArrowRight, Bot, Sparkles, MessageSquare, Share2, CreditCard, Trash2 } from 'lucide-react';
 import { cn, formatPrice } from '../lib/utils';
 import { motion, AnimatePresence } from 'motion/react';
 import { getCategoryName, getSubcategoryName } from '../constants/categories';
 import { useState } from 'react';
 import { ShareModal } from './ShareModal';
 import { ReviewModal } from './ReviewModal';
+import { ConfirmationModal } from './ConfirmationModal';
 import { useAuth } from '../hooks/useAuth';
 
 interface ListingCardProps {
@@ -23,7 +24,9 @@ interface ListingCardProps {
   onSellerClick?: (sellerId: string) => void;
   onChatClick?: (id: string, sellerId: string) => void;
   onBuyClick?: (id: string) => void;
+  onDeleteListing?: (id: string) => void;
   onAddToCart?: () => void;
+  onClick?: () => void;
   reviewCount?: number;
 }
 
@@ -42,147 +45,142 @@ export function ListingCard({
   onSellerClick,
   onChatClick,
   onBuyClick,
+  onDeleteListing,
   onAddToCart,
+  onClick,
   reviewCount = 0,
 }: ListingCardProps) {
   const { user } = useAuth();
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+  
+  const isOwner = user?.uid === sellerId;
   
   const shareUrl = typeof window !== 'undefined' 
     ? `${window.location.origin}/listing/${id}` 
-    : `https://omnimarket-ai.app/listing/${id}`;
+    : `https://noweimperium-ai.app/listing/${id}`;
 
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      whileHover={{ y: -4 }}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      className="group relative flex flex-col overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm transition-all hover:shadow-md"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="group relative flex flex-col overflow-hidden rounded-[2rem] border border-prestige-200 bg-white shadow-sm transition-all duration-500 hover:shadow-xl hover:border-prestige-300"
     >
-      <div className="relative h-48 overflow-hidden bg-slate-100">
+      {/* Image Section */}
+      <div className="relative h-56 overflow-hidden bg-prestige-100 cursor-pointer" onClick={onClick}>
         <motion.img
-          animate={{ scale: isHovered ? 1.1 : 1 }}
-          transition={{ duration: 0.6, ease: [0.33, 1, 0.68, 1] }}
+          whileHover={{ scale: 1.05 }}
+          transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
           src={image}
           alt={title}
           className="h-full w-full object-cover"
           referrerPolicy="no-referrer"
         />
-        <div className="absolute top-2 right-2">
+        
+        {/* Badges */}
+        <div className="absolute top-4 right-4 flex flex-col gap-2 items-end">
           <span className={cn(
-            "rounded px-2 py-1 text-[10px] font-bold uppercase tracking-wider shadow-sm backdrop-blur-sm",
-            type === 'product' ? "bg-white/90 text-blue-600" : "bg-teal-500/90 text-white"
+            "rounded-lg px-2.5 py-1 text-[9px] font-display font-black uppercase tracking-wider backdrop-blur-md shadow-sm border",
+            type === 'product' 
+              ? "bg-white/80 text-accent-indigo border-white/20" 
+              : "bg-accent-indigo text-white border-white/10"
           )}>
             {type === 'product' ? 'Produkt' : 'Usługa'}
           </span>
+          {isOwner && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsDeleteModalOpen(true);
+              }}
+              className="p-2 bg-rose-500/80 backdrop-blur-md text-white rounded-lg border border-white/20 hover:bg-rose-600 transition-colors shadow-lg"
+              title="Usuń ofertę"
+            >
+              <Trash2 size={12} />
+            </button>
+          )}
         </div>
-        <div className="absolute top-2 left-2">
-            <div className="bg-blue-600 text-white p-1 rounded-lg shadow-lg flex items-center gap-1 px-2">
-               <Bot size={12} />
-               <span className="text-[8px] font-black uppercase tracking-tighter">AI Verified</span>
+
+        <div className="absolute top-4 left-4">
+            <div className="bg-prestige-950/80 backdrop-blur-sm text-white px-2 py-1 rounded-lg border border-white/10 flex items-center gap-1.5">
+               <Bot size={12} className="text-accent-indigo" />
+               <span className="text-[8px] font-technical font-bold uppercase tracking-[0.1em]">AI Verified</span>
             </div>
         </div>
       </div>
 
-      <div className="flex flex-1 flex-col p-4">
-        <h4 className="font-bold text-slate-800 truncate mb-1 cursor-pointer hover:text-blue-600 transition-colors">
+      {/* Content Section */}
+      <div className="flex flex-1 flex-col p-5">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-1.5">
+            <div className="flex">
+              <Star size={14} className={cn("fill-accent-amber text-accent-amber", rating === 0 && "text-prestige-200 fill-prestige-200")} />
+            </div>
+            <span className="text-xs font-display font-bold text-prestige-900">{rating > 0 ? rating.toFixed(1) : 'New'}</span>
+            {reviewCount > 0 && <span className="text-[10px] font-medium text-prestige-400">({reviewCount})</span>}
+          </div>
+          <div className="flex items-center gap-1 text-prestige-400">
+             <MapPin size={10} />
+             <span className="text-[9px] font-medium uppercase tracking-tight">{location}</span>
+          </div>
+        </div>
+        
+        <h4 onClick={onClick} className="font-display font-bold text-prestige-900 line-clamp-1 mb-1 cursor-pointer hover:text-accent-indigo transition-colors uppercase tracking-tight text-sm">
           {title}
         </h4>
-        <p className="text-xs text-slate-500 mb-3 line-clamp-1">
+        <p className="text-[9px] text-prestige-500 mb-5 font-technical font-medium uppercase tracking-[0.05em] h-4">
           {getCategoryName(category)}
-          {subcategory ? ` / ${getSubcategoryName(category, subcategory)}` : ''} 
-          • {location}
+          {subcategory ? ` • ${getSubcategoryName(category, subcategory)}` : ''}
         </p>
 
-        <div className="mt-auto flex items-center justify-between">
-          <div 
-            onClick={() => onSellerClick?.(sellerId)}
-            className="cursor-pointer group/seller flex flex-col min-w-0 flex-1 mr-2"
-          >
-            <div className="flex items-baseline gap-2 overflow-hidden">
-              <p className="text-lg font-bold text-slate-900 group-hover/seller:text-blue-600 transition-colors whitespace-nowrap">
+        <div className="mt-auto pt-4 border-t border-prestige-100 flex flex-col gap-3">
+          <div className="flex items-center justify-between">
+            <div className="flex flex-col">
+              <p className="text-xl font-display font-black text-prestige-950 tracking-tighter leading-none">
                 {formatPrice(price)}
               </p>
-              <AnimatePresence>
-                {isHovered && (
-                  <motion.p
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -10 }}
-                    className="text-[10px] font-black text-blue-600 uppercase tracking-tighter truncate"
-                  >
-                    • {title}
-                  </motion.p>
-                )}
-              </AnimatePresence>
             </div>
-            <div>
-              <p className="text-[10px] text-slate-400 font-medium uppercase tracking-tighter group-hover/seller:text-blue-600 transition-colors">od {sellerName}</p>
-              <AnimatePresence>
-                {isHovered && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -5 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -5 }}
-                    className="flex items-center gap-0.5 mt-0.5"
-                  >
-                    {[...Array(5)].map((_, i) => (
-                      <Star 
-                        key={i} 
-                        size={8} 
-                        className={cn(
-                          i < Math.floor(rating) ? "text-amber-400 fill-amber-400" : "text-slate-200 fill-slate-200"
-                        )} 
-                      />
-                    ))}
-                    <span className="text-[8px] font-bold text-slate-400 ml-1">{rating.toFixed(1)}</span>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+            
+            <div className="flex items-center gap-2">
+              <div className="flex items-center bg-prestige-100 p-1 rounded-xl">
+                 <button 
+                   onClick={() => onChatClick?.(id, sellerId)}
+                   className="p-2 text-prestige-500 hover:text-accent-indigo hover:bg-white rounded-lg transition-all"
+                 >
+                   <MessageSquare size={16} />
+                 </button>
+                 <button 
+                   onClick={() => setIsShareModalOpen(true)}
+                   className="p-2 text-prestige-500 hover:text-accent-emerald hover:bg-white rounded-lg transition-all"
+                 >
+                   <Share2 size={16} />
+                 </button>
+              </div>
+              <button 
+                onClick={() => onBuyClick?.(id)}
+                className="px-4 py-2 bg-prestige-950 text-white rounded-xl font-display font-bold text-[10px] uppercase tracking-wider hover:bg-accent-indigo hover:shadow-lg hover:shadow-accent-indigo/20 active:scale-95 transition-all"
+              >
+                Kup Teraz
+              </button>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <button 
-              onClick={() => setIsReviewModalOpen(true)}
-              title="Oceń produkt"
-              className="p-2 rounded-lg bg-slate-50 text-slate-400 hover:bg-amber-50 hover:text-amber-600 transition-colors"
-            >
-              <Star size={18} />
-            </button>
-            <button 
-              onClick={() => setIsShareModalOpen(true)}
-              title="Udostępnij ofertę"
-              className="p-2 rounded-lg bg-slate-50 text-slate-400 hover:bg-emerald-50 hover:text-emerald-600 transition-colors"
-            >
-              <Share2 size={18} />
-            </button>
-            <button 
-              onClick={() => onChatClick?.(id, sellerId)}
-              title="Rozpocznij czat"
-              className="flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-50 text-slate-400 hover:bg-blue-50 hover:text-blue-600 transition-colors"
-            >
-              <MessageSquare size={18} />
-              <span className="text-[10px] font-black uppercase tracking-widest hidden sm:inline">Czat</span>
-            </button>
-            <button 
-              onClick={() => onBuyClick?.(id)}
-              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-600/20 group/buy"
-            >
-              <CreditCard size={18} className="group-hover/buy:scale-110 transition-transform" />
-              <span className="text-[10px] font-black uppercase tracking-widest whitespace-nowrap">Kup Teraz</span>
-            </button>
-            <button className={cn(
-              "p-2 rounded-lg transition-colors",
-              type === 'product' 
-                ? "bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white" 
-                : "bg-teal-50 text-teal-600 hover:bg-teal-600 hover:text-white"
-            )}>
-              <ArrowRight size={20} />
-            </button>
+
+          <div 
+            onClick={() => onSellerClick?.(sellerId)}
+            className="flex items-center gap-2 cursor-pointer group/seller"
+          >
+            <div className="h-6 w-6 rounded-full bg-prestige-100 overflow-hidden border border-prestige-200 group-hover/seller:border-accent-indigo transition-colors">
+              <img 
+                src={`https://api.dicebear.com/7.x/initials/svg?seed=${sellerName}`} 
+                alt={sellerName}
+                className="h-full w-full object-cover"
+              />
+            </div>
+            <p className="text-[10px] text-prestige-400 font-bold uppercase tracking-wider group-hover/seller:text-accent-indigo transition-colors">
+              By <span className="text-prestige-900 group-hover/seller:text-accent-indigo">{sellerName}</span>
+            </p>
           </div>
         </div>
       </div>
@@ -201,6 +199,17 @@ export function ListingCard({
         targetType="listing"
         targetTitle={title}
         onSuccess={() => window.location.reload()}
+      />
+
+      <ConfirmationModal 
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={() => onDeleteListing?.(id)}
+        type="danger"
+        title="Usuń ofertę"
+        message={`Czy na pewno chcesz trwale usunąć ofertę "${title}"? Te operacji nie można cofnąć.`}
+        confirmLabel="Usuń"
+        cancelLabel="Anuluj"
       />
     </motion.div>
   );

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
-import { X, Mail, Lock, User, AlertCircle, Loader2 } from 'lucide-react';
+import { X, Mail, Lock, User, AlertCircle, Loader2, Facebook } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
 interface AuthModalProps {
@@ -9,7 +9,7 @@ interface AuthModalProps {
 }
 
 export function AuthModal({ isOpen, onClose }: AuthModalProps) {
-  const { signInEmail, signUp, resetPassword, signInGoogle } = useAuth();
+  const { signInEmail, signUp, resetPassword, signInGoogle, signInFacebook } = useAuth();
   const [isLogin, setIsLogin] = useState(true);
   const [isReset, setIsReset] = useState(false);
   const [email, setEmail] = useState('');
@@ -49,6 +49,15 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
       onClose();
     } catch (err: any) {
       setError(err.message || 'Błąd logowania przez Google.');
+    }
+  };
+
+  const handleFacebookSignIn = async () => {
+    try {
+      await signInFacebook();
+      onClose();
+    } catch (err: any) {
+      setError(err.message || 'Błąd logowania przez Facebook.');
     }
   };
 
@@ -168,13 +177,22 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
                   <div className="h-px flex-1 bg-slate-100"></div>
                 </div>
 
-                <button
-                  onClick={handleGoogleSignIn}
-                  className="flex w-full items-center justify-center gap-3 rounded-2xl border border-slate-100 bg-white py-3.5 text-sm font-bold text-slate-700 transition-colors hover:bg-slate-50"
-                >
-                  <img src="https://www.google.com/favicon.ico" alt="Google" className="h-4 w-4" />
-                  Kontynuuj przez Google
-                </button>
+                <div className="grid grid-cols-2 gap-4">
+                  <button
+                    onClick={handleGoogleSignIn}
+                    className="flex items-center justify-center gap-3 rounded-2xl border border-slate-100 bg-white py-3.5 text-sm font-bold text-slate-700 transition-colors hover:bg-slate-50"
+                  >
+                    <img src="https://www.google.com/favicon.ico" alt="Google" className="h-4 w-4" />
+                    Google
+                  </button>
+                  <button
+                    onClick={handleFacebookSignIn}
+                    className="flex items-center justify-center gap-3 rounded-2xl border border-slate-100 bg-white py-3.5 text-sm font-bold text-slate-700 transition-colors hover:bg-slate-50"
+                  >
+                    <Facebook size={16} className="text-[#1877F2]" />
+                    Facebook
+                  </button>
+                </div>
               </div>
             )}
 

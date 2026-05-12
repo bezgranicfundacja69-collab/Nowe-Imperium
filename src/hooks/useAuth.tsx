@@ -3,6 +3,7 @@ import {
   User, 
   onAuthStateChanged, 
   GoogleAuthProvider, 
+  FacebookAuthProvider,
   signInWithPopup, 
   signOut,
   createUserWithEmailAndPassword,
@@ -17,6 +18,7 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   signInGoogle: () => Promise<void>;
+  signInFacebook: () => Promise<void>;
   signInEmail: (email: string, pass: string) => Promise<void>;
   signUp: (email: string, pass: string, name: string) => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
@@ -63,6 +65,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await signInWithPopup(auth, provider);
   };
 
+  const signInFacebook = async () => {
+    const provider = new FacebookAuthProvider();
+    await signInWithPopup(auth, provider);
+  };
+
   const signInEmail = async (email: string, pass: string) => {
     await signInWithEmailAndPassword(auth, email, pass);
   };
@@ -97,7 +104,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, signInGoogle, signInEmail, signUp, resetPassword, logOut, updateUserData }}>
+    <AuthContext.Provider value={{ user, loading, signInGoogle, signInFacebook, signInEmail, signUp, resetPassword, logOut, updateUserData }}>
       {children}
     </AuthContext.Provider>
   );

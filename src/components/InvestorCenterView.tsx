@@ -11,12 +11,102 @@ import {
   Zap,
   Banknote,
   Coins,
-  FileBadge
+  FileBadge,
+  Plus,
+  RefreshCw,
+  Clock,
+  CheckCircle2,
+  XCircle,
+  AlertCircle
 } from 'lucide-react';
-import { motion } from 'motion/react';
-import { cn } from '../lib/utils';
+import { motion, AnimatePresence } from 'motion/react';
+import { useState, useEffect, FormEvent } from 'react';
+import { cn, formatPrice } from '../lib/utils';
+import { useAuth } from '../hooks/useAuth';
+import { db } from '../lib/firebase';
+import { doc, updateDoc, increment } from 'firebase/firestore';
+import { handleFirestoreError } from '../lib/firestore-errors';
+import { OperationType } from '../lib/firestore-errors';
+import { getCreditProfile, applyForLoan, getUserLoans, cancelLoanApplication, CreditProfile, LoanApplication } from '../services/creditService';
+import { ConfirmationModal } from './ConfirmationModal';
 
-export function InvestorCenterView() {
+import { ViewProps } from '../types/view';
+
+export function InvestorCenterView({ onNavigate, cart }: ViewProps) {
+  const { user } = useAuth();
+  const [profile, setProfile] = useState<CreditProfile | null>(null);
+  const [loans, setLoans] = useState<LoanApplication[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [pendingCancelId, setPendingCancelId] = useState<string | null>(null);
+  const [formData, setFormData] = useState({
+    amount: '',
+    purpose: '',
+    type: 'Gotówkowy'
+  });
+
+  useEffect(() => {
+    if (user) {
+      loadCreditData();
+    }
+  }, [user]);
+
+  async function loadCreditData() {
+    if (!user) return;
+    setLoading(true);
+    const [p, l] = await Promise.all([
+      getCreditProfile(user.uid),
+      getUserLoans(user.uid)
+    ]);
+    setProfile(p);
+    setLoans(l);
+    setLoading(false);
+  }
+
+  const handleApply = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!user) return;
+    setIsSubmitting(true);
+    const amount = parseFloat(formData.amount);
+    const success = await applyForLoan(user.uid, amount, formData.purpose, formData.type);
+    if (success) {
+      setIsApplyModalOpen(false);
+      setFormData({ amount: '', purpose: '', type: 'Gotówkowy' });
+      loadCreditData();
+    }
+    setIsSubmitting(false);
+  };
+
+  const confirmCancelLoan = async () => {
+    if (!pendingCancelId) return;
+    const success = await cancelLoanApplication(pendingCancelId);
+    if (success) loadCreditData();
+    setPendingCancelId(null);
+  };
+
+  const simulateStatus = async (loanId: string, newStatus: string) => {
+    try {
+      const loanRef = doc(db, 'loanApplications', loanId);
+      await updateDoc(loanRef, { status: newStatus });
+      
+      // If disbursed, should also update wallet / credit profile
+      if (newStatus === 'disbursed' && user) {
+        const loan = loans.find(l => l.id === loanId);
+        if (loan) {
+          const walletRef = doc(db, 'wallets', user.uid);
+          await updateDoc(walletRef, { 
+            balance: increment(loan.amount) 
+          });
+        }
+      }
+      
+      loadCreditData();
+    } catch (error) {
+      handleFirestoreError(error, OperationType.UPDATE, `loanApplications/${loanId}`);
+    }
+  };
+
   const OFFERS = [
     {
       title: 'Kredyty Bankowe',
@@ -49,7 +139,7 @@ export function InvestorCenterView() {
   ];
 
   const FUNDS = [
-    { name: 'OmniGrowth Fund I', returns: '+24.5%', risk: 'Medium', min: '10,000 PLN' },
+    { name: 'Imperium Growth I', returns: '+24.5%', risk: 'Medium', min: '10,000 PLN' },
     { name: 'AI Innovation Seed', returns: '+42.1%', risk: 'High', min: '50,000 PLN' },
     { name: 'Real Estate Token', returns: '+8.2%', risk: 'Low', min: '1,000 PLN' }
   ];
@@ -68,7 +158,7 @@ export function InvestorCenterView() {
         </div>
         <div className="relative z-10 max-w-3xl">
           <div className="inline-flex items-center gap-2 rounded-full bg-blue-500/20 px-4 py-1 text-xs font-bold uppercase tracking-widest text-blue-400 border border-blue-500/30 mb-8 font-mono">
-            <TrendingUp size={14} className="animate-pulse" /> OmniFinance Node
+            <TrendingUp size={14} className="animate-pulse" /> Imperium Finance Node
           </div>
           <h1 className="text-5xl font-black mb-6 leading-tight sm:text-8xl italic tracking-tighter uppercase">
             Centrum <br /><span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400 text-glow-blue">Inwestora</span>
@@ -89,6 +179,127 @@ export function InvestorCenterView() {
           </div>
         </div>
       </section>
+ 
+      {/* Credit Dashboard */}
+      {user && profile && (
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="grid grid-cols-1 lg:grid-cols-3 gap-6"
+        >
+          <div className="lg:col-span-2 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-[48px] p-8 md:p-12 text-white shadow-xl relative overflow-hidden group">
+             <div className="absolute top-0 right-0 p-12 opacity-10 group-hover:scale-110 transition-transform duration-1000">
+                <ShieldCheck size={160} />
+             </div>
+             <div className="relative z-10">
+                <div className="flex items-center justify-between mb-8">
+                   <div>
+                      <p className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-200 mb-1">Twój Limit Kredytowy</p>
+                      <h2 className="text-5xl font-black italic tracking-tighter">{formatPrice(profile.creditLimit)}</h2>
+                   </div>
+                   <div className="h-16 w-16 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/20">
+                      <Wallet size={32} />
+                   </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-8 mb-10">
+                   <div>
+                      <p className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-200 mb-1">Dostępne środki</p>
+                      <p className="text-2xl font-black italic tracking-tight">{formatPrice(profile.availableCredit)}</p>
+                   </div>
+                   <div>
+                      <p className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-200 mb-1">noweScore</p>
+                      <div className="flex items-center gap-2">
+                         <p className="text-2xl font-black italic tracking-tight">{profile.creditScore}</p>
+                         <span className="text-[8px] font-black bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-full uppercase tracking-widest border border-emerald-500/30">Excellent</span>
+                      </div>
+                   </div>
+                </div>
+
+                <div className="flex flex-wrap gap-4">
+                   <button 
+                     onClick={() => setIsApplyModalOpen(true)}
+                     className="px-8 py-4 bg-white text-blue-600 rounded-2xl font-black text-xs uppercase tracking-widest hover:scale-105 transition-transform shadow-lg active:scale-95"
+                   >
+                      Nowy Wniosek
+                   </button>
+                   <button className="px-8 py-4 bg-blue-500/30 border border-blue-400/30 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-blue-500/40 transition-all">
+                      Zwiększ Limit
+                   </button>
+                </div>
+             </div>
+          </div>
+
+          <div className="bg-white rounded-[48px] p-8 md:p-10 border border-slate-100 shadow-sm flex flex-col">
+             <div className="flex items-center justify-between mb-6">
+                <h3 className="text-lg font-black text-slate-900 uppercase italic tracking-tight">Moje Wnioski</h3>
+                <RefreshCw 
+                  size={16} 
+                  className={cn("text-slate-300 cursor-pointer hover:text-blue-500 transition-colors", loading && "animate-spin")} 
+                  onClick={loadCreditData}
+                />
+             </div>
+             
+             <div className="space-y-4 flex-1 overflow-y-auto max-h-[300px] pr-2">
+                {loans.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center h-full py-10 opacity-40">
+                     <Clock size={48} className="mb-4" />
+                     <p className="text-[10px] font-black uppercase tracking-widest text-center">Brak aktywnych wniosków</p>
+                  </div>
+                ) : (
+                  loans.map((loan) => (
+                    <div key={loan.id} className="p-4 rounded-3xl bg-slate-50 border border-slate-100 group relative hover:border-slate-300 transition-colors">
+                       <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center gap-2">
+                             {loan.status === 'approved' && <CheckCircle2 size={12} className="text-emerald-500" />}
+                             {loan.status === 'rejected' && <XCircle size={12} className="text-rose-500" />}
+                             {loan.status === 'pending' && <Clock size={12} className="text-amber-500" />}
+                             <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">{loan.loanType}</span>
+                          </div>
+                             <div className={cn(
+                                "px-2 py-0.5 rounded-full text-[7px] font-black uppercase tracking-widest border",
+                                loan.status === 'approved' ? "bg-emerald-50 text-emerald-600 border-emerald-100" :
+                                loan.status === 'disbursed' ? "bg-blue-50 text-blue-600 border-blue-100" :
+                                loan.status === 'rejected' ? "bg-rose-50 text-rose-600 border-rose-100" :
+                                "bg-amber-50 text-amber-600 border-amber-100"
+                              )}>
+                                 {loan.status === 'pending' ? 'W trakcie' : 
+                                  loan.status === 'approved' ? 'Zatwierdzony' :
+                                  loan.status === 'disbursed' ? 'Wypłacony' : 
+                                  'Odrzucony'}
+                              </div>
+                       </div>
+                       <p className="font-black text-slate-900 mb-1">{formatPrice(loan.amount)}</p>
+                       <p className="text-[10px] text-slate-500 font-medium line-clamp-1 italic">Cel: {loan.purpose}</p>
+                       
+                       <div className="mt-3 flex flex-wrap gap-2 pt-3 border-t border-slate-100">
+                          {loan.status === 'pending' && (
+                             <>
+                                <button onClick={() => simulateStatus(loan.id!, 'approved')} className="text-[7px] font-black uppercase tracking-widest px-2 py-1 bg-emerald-500 text-white rounded-md hover:bg-emerald-600 transition-colors">Zatwierdź (Demo)</button>
+                                <button onClick={() => simulateStatus(loan.id!, 'rejected')} className="text-[7px] font-black uppercase tracking-widest px-2 py-1 bg-rose-500 text-white rounded-md hover:bg-rose-600 transition-colors">Odrzuć (Demo)</button>
+                             </>
+                          )}
+                          {loan.status === 'approved' && (
+                             <button onClick={() => simulateStatus(loan.id!, 'disbursed')} className="text-[7px] font-black uppercase tracking-widest px-2 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">Wypłać (Demo)</button>
+                          )}
+                       </div>
+
+                       {loan.status === 'pending' && (
+                         <button 
+                           onClick={() => loan.id && setPendingCancelId(loan.id)}
+                           className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 p-1 text-slate-300 hover:text-rose-500 transition-all active:scale-90"
+                           title="Anuluj wniosek"
+                         >
+                            <XCircle size={16} />
+                         </button>
+                       )}
+                    </div>
+                  ))
+                )}
+             </div>
+          </div>
+        </motion.div>
+      )}
 
       {/* Loan Sections */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -217,7 +428,7 @@ export function InvestorCenterView() {
       <section className="bg-white border border-slate-100 rounded-[48px] p-12 overflow-hidden relative shadow-sm">
          <div className="flex flex-col lg:flex-row items-center gap-12">
             <div className="lg:w-1/2">
-               <h2 className="text-3xl font-black text-slate-900 mb-6 italic uppercase tracking-tighter leading-tight">Gwarancja Bezpieczeństwa OmniShield</h2>
+               <h2 className="text-3xl font-black text-slate-900 mb-6 italic uppercase tracking-tighter leading-tight">Gwarancja Bezpieczeństwa Imperium Shield</h2>
                <p className="text-slate-500 text-lg font-medium leading-relaxed italic mb-8">Wszystkie podmioty finansowe na naszej platformie przechodzą rygorystyczną weryfikację. Twoje dane są szyfrowane i chronione przez nasze autorskie systemy cyberbezpieczeństwa.</p>
                <div className="grid grid-cols-2 gap-6">
                   <div className="flex items-center gap-3">
@@ -242,6 +453,112 @@ export function InvestorCenterView() {
             </div>
          </div>
       </section>
+
+      {/* Apply Loan Modal */}
+      <AnimatePresence>
+        {isApplyModalOpen && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsApplyModalOpen(false)}
+              className="absolute inset-0 bg-slate-900/60 backdrop-blur-md"
+            />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="relative w-full max-w-lg bg-white rounded-[40px] shadow-2xl overflow-hidden"
+            >
+               <div className="p-8 border-b border-slate-50 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                     <div className="h-10 w-10 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600">
+                        <Banknote size={20} />
+                     </div>
+                     <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest leading-none">Wniosek o finansowanie</h3>
+                  </div>
+                  <button 
+                    onClick={() => setIsApplyModalOpen(false)}
+                    className="p-2 hover:bg-slate-50 rounded-full transition-colors"
+                  >
+                    <XCircle size={24} className="text-slate-300" />
+                  </button>
+               </div>
+
+               <form onSubmit={handleApply} className="p-8 space-y-6">
+                  <div>
+                    <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest block mb-2">Kwota Finansowania (PLN)</label>
+                    <input 
+                      required
+                      type="number"
+                      value={formData.amount}
+                      onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
+                      placeholder="np. 5000"
+                      className="w-full px-6 py-4 rounded-2xl bg-slate-50 border-none font-bold text-slate-900 focus:ring-2 focus:ring-blue-500/20"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest block mb-2">Cel finansowania</label>
+                    <textarea 
+                      required
+                      value={formData.purpose}
+                      onChange={(e) => setFormData({ ...formData, purpose: e.target.value })}
+                      placeholder="Opisz na co przeznaczysz środki..."
+                      className="w-full px-6 py-4 rounded-2xl bg-slate-50 border-none font-bold text-slate-900 focus:ring-2 focus:ring-blue-500/20 h-32 resize-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest block mb-2">Rodzaj finansowania</label>
+                    <div className="grid grid-cols-2 gap-4">
+                       {['Gotówkowy', 'Inwestycyjny', 'Obrotowy', 'Leasing'].map((t) => (
+                         <button
+                           key={t}
+                           type="button"
+                           onClick={() => setFormData({ ...formData, type: t })}
+                           className={cn(
+                             "px-4 py-3 rounded-2xl font-bold text-xs transition-all border-2",
+                             formData.type === t ? "bg-blue-600 border-blue-600 text-white shadow-lg shadow-blue-600/20" : "bg-slate-50 border-transparent text-slate-500 hover:border-slate-200"
+                           )}
+                         >
+                           {t}
+                         </button>
+                       ))}
+                    </div>
+                  </div>
+
+                  <div className="pt-4 space-y-4">
+                     <div className="p-4 rounded-2xl bg-amber-50 border border-amber-100 flex gap-3">
+                        <AlertCircle className="text-amber-600 shrink-0" size={18} />
+                        <p className="text-[10px] font-bold text-amber-900 leading-relaxed">Pamiętaj, że każdy wniosek podlega analizie ryzyka AI. Decyzję otrzymasz w ciągu kilku minut.</p>
+                     </div>
+                     
+                     <button 
+                       type="submit"
+                       disabled={isSubmitting}
+                       className="w-full py-5 bg-blue-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-blue-700 transition-all shadow-xl shadow-blue-600/20 disabled:opacity-50 flex items-center justify-center gap-2"
+                     >
+                       {isSubmitting ? <RefreshCw className="animate-spin" size={16} /> : 'Wyślij Wniosek'}
+                     </button>
+                  </div>
+               </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      <ConfirmationModal 
+        isOpen={!!pendingCancelId}
+        onClose={() => setPendingCancelId(null)}
+        onConfirm={confirmCancelLoan}
+        type="danger"
+        title="Anuluj wniosek"
+        message="Czy na pewno chcesz anulować ten wniosek o finansowanie? Tej operacji nie można cofnąć."
+        confirmLabel="Tak, anuluj"
+        cancelLabel="Wróć"
+      />
     </div>
   );
 }

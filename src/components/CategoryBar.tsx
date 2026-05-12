@@ -14,7 +14,7 @@ const PROMOTIONS = [
   },
   {
     id: 2,
-    title: 'OmniSync: Allegro Integration',
+    title: 'noweSync: Allegro Integration',
     subtitle: 'Synchronizuj oferty w 30 sekund',
     image: 'https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&q=80&w=600',
     category: 'business',
@@ -41,23 +41,23 @@ export function CategoryBar({ selectedCategory, selectedSubcategory, onSelect, o
   const activeCategory = CATEGORIES.find(c => c.id === selectedCategory);
 
   return (
-    <div className="bg-white border-b border-slate-100">
+    <div className="bg-white border-b border-prestige-100 shadow-[0_4px_30px_rgba(0,0,0,0.02)]">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center gap-6 overflow-x-auto py-5 no-scrollbar">
+        <div className="flex items-center gap-8 overflow-x-auto py-6 no-scrollbar">
           <button
             onClick={() => onSelect('', '')}
             className={cn(
-              "flex flex-col items-center gap-2 transition-all min-w-fit px-2",
-              selectedCategory === '' ? "text-blue-600 scale-105" : "text-slate-400 hover:text-slate-900"
+              "flex flex-col items-center gap-3 transition-all min-w-fit px-2 group",
+              selectedCategory === '' ? "text-accent-indigo opacity-100" : "text-prestige-400 hover:text-prestige-950 opacity-100"
             )}
           >
             <div className={cn(
-              "flex h-14 w-14 items-center justify-center rounded-[20px] transition-all",
-              selectedCategory === '' ? "bg-blue-50 shadow-sm" : "bg-slate-50"
+              "flex h-16 w-16 items-center justify-center rounded-[24px] transition-all duration-300 border",
+              selectedCategory === '' ? "bg-prestige-950 text-white border-prestige-950 shadow-xl shadow-prestige-950/20" : "bg-prestige-50 border-prestige-100 group-hover:bg-prestige-100 group-hover:border-prestige-200"
             )}>
-              <Package size={22} />
+              <Package size={24} />
             </div>
-            <span className="text-[10px] font-black uppercase tracking-widest">Wszystko</span>
+            <span className="text-[10px] font-technical font-bold uppercase tracking-[0.2em]">All</span>
           </button>
 
           {CATEGORIES.map((category) => {
@@ -69,17 +69,17 @@ export function CategoryBar({ selectedCategory, selectedSubcategory, onSelect, o
                 key={category.id}
                 onClick={() => onSelect(category.id, '')}
                 className={cn(
-                  "flex flex-col items-center gap-2 transition-all min-w-fit px-2",
-                  isActive ? "text-blue-600 scale-105" : "text-slate-400 hover:text-slate-900"
+                  "flex flex-col items-center gap-3 transition-all min-w-fit px-2 group",
+                  isActive ? "text-accent-indigo opacity-100" : "text-prestige-400 hover:text-prestige-950 opacity-100"
                 )}
               >
                 <div className={cn(
-                  "flex h-14 w-14 items-center justify-center rounded-[20px] transition-all",
-                  isActive ? "bg-blue-50 shadow-sm" : "bg-slate-50"
+                  "flex h-16 w-16 items-center justify-center rounded-[24px] transition-all duration-300 border",
+                  isActive ? "bg-prestige-950 text-white border-prestige-950 shadow-xl shadow-prestige-950/20" : "bg-prestige-50 border-prestige-100 group-hover:bg-prestige-100 group-hover:border-prestige-200"
                 )}>
-                  <Icon size={22} />
+                  <Icon size={24} />
                 </div>
-                <span className="text-[10px] font-black uppercase tracking-widest">{category.name}</span>
+                <span className="text-[10px] font-technical font-bold uppercase tracking-[0.2em]">{category.name}</span>
               </button>
             );
           })}
@@ -93,23 +93,23 @@ export function CategoryBar({ selectedCategory, selectedSubcategory, onSelect, o
               exit={{ height: 0, opacity: 0 }}
               className="overflow-hidden"
             >
-              <div className="flex items-center gap-3 overflow-x-auto py-4 border-t border-slate-50 no-scrollbar pb-6">
+              <div className="flex items-center gap-3 overflow-x-auto py-5 border-t border-prestige-100 no-scrollbar pb-8">
                 <button
                   onClick={() => onSelect(selectedCategory, '')}
                   className={cn(
-                    "px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest whitespace-nowrap transition-all",
-                    selectedSubcategory === '' ? "bg-slate-900 text-white" : "bg-slate-50 text-slate-500 hover:bg-slate-100"
+                    "px-6 py-2.5 rounded-full text-[10px] font-technical font-bold uppercase tracking-widest whitespace-nowrap transition-all border",
+                    selectedSubcategory === '' ? "bg-accent-indigo text-white border-accent-indigo shadow-lg shadow-accent-indigo/20" : "bg-white text-prestige-500 border-prestige-200 hover:border-accent-indigo hover:text-accent-indigo"
                   )}
                 >
-                  Wszystkie {activeCategory.name}
+                  All {activeCategory.name}
                 </button>
                 {activeCategory.subcategories.map((sub) => (
                   <button
                     key={sub.id}
                     onClick={() => onSelect(selectedCategory, sub.id)}
                     className={cn(
-                      "px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest whitespace-nowrap transition-all",
-                      selectedSubcategory === sub.id ? "bg-blue-600 text-white shadow-lg shadow-blue-600/20" : "bg-slate-50 text-slate-500 hover:bg-slate-100"
+                      "px-6 py-2.5 rounded-full text-[10px] font-technical font-bold uppercase tracking-widest whitespace-nowrap transition-all border",
+                      selectedSubcategory === sub.id ? "bg-accent-indigo text-white border-accent-indigo shadow-lg shadow-accent-indigo/20" : "bg-white text-prestige-500 border-prestige-200 hover:border-accent-indigo hover:text-accent-indigo"
                     )}
                   >
                     {sub.name}
@@ -121,14 +121,14 @@ export function CategoryBar({ selectedCategory, selectedSubcategory, onSelect, o
         </AnimatePresence>
 
         {/* Promotions Section */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-8 mt-2">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-12 mt-4">
           {PROMOTIONS.map((promo) => (
             <motion.div
               key={promo.id}
-              whileHover={{ y: -4 }}
+              whileHover={{ y: -6 }}
               className={cn(
-                "relative h-32 rounded-[28px] overflow-hidden group cursor-pointer border border-slate-100",
-                "bg-gradient-to-br", promo.color
+                "relative h-40 rounded-[2.5rem] overflow-hidden group cursor-pointer border border-prestige-200",
+                "bg-prestige-950 shadow-xl shadow-prestige-950/5"
               )}
               onClick={() => {
                 if (promo.category === 'integrations' || promo.category === 'business' || promo.category === 'ready-businesses') {
@@ -138,29 +138,30 @@ export function CategoryBar({ selectedCategory, selectedSubcategory, onSelect, o
                 }
               }}
             >
-              <div className="absolute inset-0 z-0">
+              <div className="absolute inset-0 z-0 opacity-40">
                 <img 
                   src={promo.image} 
                   alt={promo.title} 
-                  className="w-full h-full object-cover opacity-30 group-hover:scale-110 transition-transform duration-700"
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-[1200ms]"
                   referrerPolicy="no-referrer"
                 />
-                <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors" />
+                <div className="absolute inset-0 bg-gradient-to-br from-prestige-950 via-prestige-950/20 to-transparent" />
               </div>
               
-              <div className="relative z-10 p-6 h-full flex flex-col justify-center">
-                <div className="flex items-center justify-between gap-4">
-                  <div>
-                    <h4 className="text-white font-black text-sm uppercase tracking-tighter italic flex items-center gap-2">
-                       <Zap size={14} className="text-amber-400 fill-amber-400" /> {promo.title}
+              <div className="relative z-10 p-8 h-full flex flex-col justify-center">
+                <div className="flex items-center justify-between gap-6">
+                  <div className="flex-1">
+                    <h4 className="text-white font-display font-black text-lg uppercase tracking-tighter italic flex items-center gap-2 mb-1">
+                       <Zap size={16} className="text-accent-indigo fill-accent-indigo" /> {promo.title}
                     </h4>
-                    <p className="text-white/70 text-[10px] font-bold mt-1 uppercase tracking-widest">{promo.subtitle}</p>
+                    <p className="text-prestige-400 text-[10px] font-technical font-bold uppercase tracking-[0.2em]">{promo.subtitle}</p>
                   </div>
-                  <button className="flex items-center gap-2 px-4 py-3 bg-white text-slate-900 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-500 hover:text-white transition-all shadow-xl group-hover:translate-x-1">
-                    Zobacz ofertę <ArrowRight size={14} />
+                  <button className="flex h-12 w-12 items-center justify-center bg-white text-prestige-950 rounded-2xl transition-all group-hover:bg-accent-indigo group-hover:text-white group-hover:scale-110 shadow-2xl">
+                    <ArrowRight size={20} />
                   </button>
                 </div>
               </div>
+              <div className="absolute bottom-0 left-0 h-1 w-0 bg-accent-indigo transition-all duration-500 group-hover:w-full" />
             </motion.div>
           ))}
         </div>

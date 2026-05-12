@@ -12,7 +12,9 @@ import { motion } from 'motion/react';
 import { cn } from '../lib/utils';
 import { useState } from 'react';
 
-export function TourismHub() {
+import { ViewProps } from '../types/view';
+
+export function TourismHub({ onNavigate, cart }: ViewProps) {
   const [searchQuery, setSearchQuery] = useState('Warszawa');
 
   return (
@@ -79,7 +81,7 @@ export function TourismHub() {
             <PromoCard 
               image="https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&q=80&w=400"
               title="Luksusowe Hotele"
-              desc="Zniżki do 40% dla partnerów OmniMarket."
+              desc="Zniżki do 40% dla partnerów noweimperium."
             />
             <PromoCard 
               image="https://images.unsplash.com/photo-1530789253388-582c481c54b0?auto=format&fit=crop&q=80&w=400"
@@ -101,7 +103,7 @@ export function TourismHub() {
                     <img src={`https://picsum.photos/seed/hotel${i}/200/200`} alt="Hotel" className="w-full h-full object-cover transition-transform group-hover:scale-110" referrerPolicy="no-referrer" />
                   </div>
                   <div className="flex-1">
-                    <h4 className="text-sm font-black text-slate-900 group-hover:text-sky-600 transition-colors">Grand Omni Resort {i}</h4>
+                    <h4 className="text-sm font-black text-slate-900 group-hover:text-sky-600 transition-colors">Grand nowe Resort {i}</h4>
                     <p className="text-xs text-slate-500 font-medium mt-1">Grecja, Mykonos</p>
                     <div className="flex items-center justify-between mt-2">
                        <span className="text-sm font-black text-sky-600">od 450 PLN</span>
@@ -120,7 +122,7 @@ export function TourismHub() {
 
           <div className="bg-gradient-to-br from-sky-600 to-indigo-700 rounded-[40px] p-8 text-white relative overflow-hidden group">
             <Plane className="mb-6 opacity-30 animate-pulse" size={48} />
-            <h3 className="text-2xl font-black mb-4 leading-tight italic">OmniFlight AI</h3>
+            <h3 className="text-2xl font-black mb-4 leading-tight italic">noweFlight AI</h3>
             <p className="text-sky-100 text-sm mb-8 leading-relaxed font-medium italic">Nasze algorytmy przeszukują tysiące połączeń, aby znaleźć najtańsze bilety dla Ciebie.</p>
             <button className="w-full py-4 bg-white text-sky-600 rounded-2xl font-black text-xs uppercase tracking-widest hover:scale-105 transition-transform shadow-lg shadow-sky-900/20">
               Szukaj Lotów

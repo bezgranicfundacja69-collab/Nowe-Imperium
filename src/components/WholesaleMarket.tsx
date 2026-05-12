@@ -36,16 +36,22 @@ const AFFILIATE_PROGRAMS = [
   { id: 'af3', name: 'Awin International', commission: 'Custom Commission', status: 'Wymaga Konta', logo: 'AW' },
   { id: 'af5', name: 'Google AdSense', commission: 'CPC/CPM Revenue', status: 'Gotowy do AI', logo: 'G' },
   { id: 'af6', name: 'Microsoft Ads', commission: 'High CPC Tiers', status: 'W trakcie AI', logo: 'M' },
-  { id: 'af4', name: 'OmniAds Referral', commission: '10% Revenue Share', status: 'Premium', logo: 'OM' }
+  { id: 'af4', name: 'nowe Ads Referral', commission: '10% Revenue Share', status: 'Premium', logo: 'NA' }
 ];
 
 const VIDEO_CHANNELS = [
-  { id: 'v1', title: 'Strategie Skalowania 2026', author: 'Ekspert OmniMarket', duration: '12:45', thumbnail: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&q=80&w=400' },
+  { id: 'v1', title: 'Strategie Skalowania 2026', author: 'Ekspert noweimperium', duration: '12:45', thumbnail: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&q=80&w=400' },
   { id: 'v2', title: 'Automatyzacja MyLead', author: 'Affiliate Pro', duration: '08:20', thumbnail: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=400' },
   { id: 'v3', title: 'Export na Rynki USA', author: 'Global Seller', duration: '15:10', thumbnail: 'https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?auto=format&fit=crop&q=80&w=400' }
 ];
 
-export function WholesaleMarket({ onViewChange }: { onViewChange?: (view: any) => void }) {
+import { ViewProps } from '../types/view';
+
+interface WholesaleMarketProps extends ViewProps {
+  onViewChange?: (view: any) => void;
+}
+
+export function WholesaleMarket({ onViewChange, onNavigate, cart }: WholesaleMarketProps) {
   const [activeTab, setActiveTab] = useState<'market' | 'affiliate' | 'video'>('market');
 
   return (
@@ -107,7 +113,7 @@ export function WholesaleMarket({ onViewChange }: { onViewChange?: (view: any) =
                 <div className="p-8 border-b border-slate-50 flex items-center justify-between">
                     <div>
                         <h2 className="text-2xl font-black text-slate-900">Katalog Dostawców</h2>
-                        <p className="text-sm text-slate-500 font-medium">Topowe hurtownie dropshippingowe zintegrowane z OmniMarket.</p>
+                        <p className="text-sm text-slate-500 font-medium">Topowe hurtownie dropshippingowe zintegrowane z noweimperium.</p>
                     </div>
                     <div className="flex items-center gap-2">
                         <span className="px-3 py-1 bg-blue-50 text-blue-600 rounded-lg text-[10px] font-black uppercase">Filtruj: Polska</span>
@@ -262,7 +268,7 @@ export function WholesaleMarket({ onViewChange }: { onViewChange?: (view: any) =
                         <div className="absolute top-0 right-0 -mr-20 -mt-20 h-64 w-64 bg-white/10 rounded-full blur-3xl animate-pulse" />
                         <div className="relative z-10">
                             <h3 className="text-3xl font-black mb-4 italic tracking-tighter uppercase">Monetyzacja AI: Big Tech Hub</h3>
-                            <p className="text-blue-100 text-lg max-w-2xl mb-8 leading-relaxed font-medium">Połącz swój sklep OmniMarket z Google AdSense i Microsoft Advertising. Boty AI automatycznie optymalizują rozmieszczenie reklam pod kątem CTR.</p>
+                            <p className="text-blue-100 text-lg max-w-2xl mb-8 leading-relaxed font-medium">Połącz swój sklep noweimperium z Google AdSense i Microsoft Advertising. Boty AI automatycznie optymalizują rozmieszczenie reklam pod kątem CTR.</p>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 mb-8">
                                 <div className="p-6 bg-white/10 rounded-[32px] border border-white/20 backdrop-blur-md">
                                     <h4 className="font-black text-xl mb-2 flex items-center gap-2">
@@ -307,7 +313,7 @@ export function WholesaleMarket({ onViewChange }: { onViewChange?: (view: any) =
                       <TrendingUp size={28} className="text-blue-400" />
                     </div>
                     <h3 className="text-2xl font-black mb-4 leading-tight italic">Ekspert Afiliacji MyLead</h3>
-                    <p className="text-slate-400 text-sm mb-8 leading-relaxed font-medium">Polecaj produkty z MyLead bezpośrednio przez OmniMarket i odbieraj prowizję na swój portfel AI.</p>
+                    <p className="text-slate-400 text-sm mb-8 leading-relaxed font-medium">Polecaj produkty z MyLead bezpośrednio przez noweimperium i odbieraj prowizję na swój portfel AI.</p>
                     <button className="w-full py-4 bg-blue-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-blue-500 transition-all shadow-lg shadow-blue-600/30">
                         Otwórz Panel MyLead
                     </button>
@@ -377,7 +383,7 @@ export function WholesaleMarket({ onViewChange }: { onViewChange?: (view: any) =
             <div className="absolute top-0 right-0 -mr-20 -mt-20 h-64 w-64 rounded-full bg-blue-500/5 blur-3xl" />
             <div className="flex-1 relative z-10">
                <h2 className="text-4xl font-black text-slate-900 mb-6 italic leading-tight">Zostań Twórcą <br /> Video Partner</h2>
-               <p className="text-slate-600 text-lg font-medium leading-relaxed mb-8 italic">Twórz poradniki dla innych sprzedawców i zarabiaj OmniCash za każde wyświetlenie i polecenie systemu.</p>
+               <p className="text-slate-600 text-lg font-medium leading-relaxed mb-8 italic">Twórz poradniki dla innych sprzedawców i zarabiaj noweCash za każde wyświetlenie i polecenie systemu.</p>
                <button className="px-10 py-5 bg-blue-600 text-white rounded-3xl font-black text-xs uppercase tracking-widest hover:scale-105 transition-transform shadow-xl shadow-blue-600/30">
                  Aplikuj do Programu Partnerskiego
                </button>

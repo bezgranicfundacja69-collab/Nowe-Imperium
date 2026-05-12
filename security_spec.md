@@ -1,4 +1,4 @@
-# OmniMarket Security Specification
+# noweimperium Security Specification
 
 ## Data Invariants
 1. Listings must have a valid `sellerId` matching the creator's UID.

@@ -1,7 +1,16 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Copy, Check, Facebook, Twitter, Phone as WhatsApp, Share2, Send, Linkedin } from 'lucide-react';
+import { 
+  X, 
+  Facebook, 
+  Twitter, 
+  Linkedin, 
+  Link as LinkIcon, 
+  Check,
+  Share2
+} from 'lucide-react';
 import { cn } from '../lib/utils';
+import { toast } from 'sonner';
 
 interface ShareModalProps {
   isOpen: boolean;
@@ -13,133 +22,104 @@ interface ShareModalProps {
 export function ShareModal({ isOpen, onClose, title, url }: ShareModalProps) {
   const [copied, setCopied] = useState(false);
 
-  const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(url);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch (err) {
-      console.error('Failed to copy text: ', err);
-    }
-  };
-
   const shareOptions = [
     {
       name: 'Facebook',
-      icon: Facebook,
+      icon: <Facebook size={20} />,
       color: 'bg-[#1877F2]',
-      href: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`,
+      url: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`
     },
     {
       name: 'Twitter',
-      icon: Twitter,
+      icon: <Twitter size={20} />,
       color: 'bg-[#1DA1F2]',
-      href: `https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(title)}`,
-    },
-    {
-      name: 'WhatsApp',
-      icon: WhatsApp,
-      color: 'bg-[#25D366]',
-      href: `https://wa.me/?text=${encodeURIComponent(`${title} ${url}`)}`,
-    },
-    {
-      name: 'Telegram',
-      icon: Send,
-      color: 'bg-[#0088cc]',
-      href: `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(title)}`,
+      url: `https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(title)}`
     },
     {
       name: 'LinkedIn',
-      icon: Linkedin,
-      color: 'bg-[#0077b5]',
-      href: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`,
-    },
+      icon: <Linkedin size={20} />,
+      color: 'bg-[#0077B5]',
+      url: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`
+    }
   ];
+
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(url);
+    setCopied(true);
+    toast.success('Link skopiowany do schowka!');
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   return (
     <AnimatePresence>
       {isOpen && (
-        <>
+        <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4">
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 z-[100] bg-slate-900/40 backdrop-blur-sm"
+            className="absolute inset-0 bg-slate-900/60 backdrop-blur-md"
           />
-          <div className="fixed inset-0 z-[101] flex items-center justify-center p-4 pointer-events-none">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="w-full max-w-sm bg-white rounded-[32px] p-8 shadow-2xl pointer-events-auto border border-slate-100"
-            >
-              <div className="flex items-center justify-between mb-8">
-                <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600">
-                        <Share2 size={24} />
-                    </div>
-                    <h3 className="text-xl font-black text-slate-900 italic tracking-tighter">Udostępnij Ofertę</h3>
-                </div>
-                <button 
-                  onClick={onClose}
-                  className="p-2 hover:bg-slate-50 rounded-xl transition-colors text-slate-400"
-                >
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+            className="relative w-full max-w-sm bg-white rounded-[40px] shadow-2xl overflow-hidden p-8"
+          >
+            <div className="flex items-center justify-between mb-8">
+               <div className="flex items-center gap-2 text-[10px] font-black text-blue-600 uppercase tracking-widest">
+                  <Share2 size={14} /> Udostępnij
+               </div>
+               <button onClick={onClose} className="p-2 hover:bg-slate-50 rounded-full transition-colors">
                   <X size={20} />
+               </button>
+            </div>
+
+            <h3 className="text-xl font-black text-slate-900 mb-6 italic tracking-tight">
+              {title}
+            </h3>
+
+            <div className="grid grid-cols-3 gap-4 mb-8">
+              {shareOptions.map((option) => (
+                <a
+                  key={option.name}
+                  href={option.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex flex-col items-center gap-2 group"
+                >
+                  <div className={cn(
+                    "h-12 w-12 rounded-2xl flex items-center justify-center text-white shadow-lg transition-all group-hover:-translate-y-1 group-active:scale-95",
+                    option.color
+                  )}>
+                    {option.icon}
+                  </div>
+                  <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 group-hover:text-slate-900 transition-colors">
+                    {option.name}
+                  </span>
+                </a>
+              ))}
+            </div>
+
+            <div className="space-y-3">
+              <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest block ml-2">Skopiuj Link</label>
+              <div className="relative">
+                <input
+                  readOnly
+                  value={url}
+                  className="w-full bg-slate-50 border-none rounded-2xl pl-4 pr-12 py-4 text-xs font-bold text-slate-600 shadow-inner overflow-hidden text-ellipsis"
+                />
+                <button
+                  onClick={handleCopyLink}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-white rounded-xl shadow-sm border border-slate-100 text-blue-600 hover:bg-blue-50 transition-all active:scale-90"
+                >
+                  {copied ? <Check size={16} /> : <LinkIcon size={16} />}
                 </button>
               </div>
-
-              <div className="grid grid-cols-3 gap-4 mb-8">
-                {shareOptions.map((option) => (
-                  <a
-                    key={option.name}
-                    href={option.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex flex-col items-center gap-2 group"
-                  >
-                    <div className={cn(
-                      "h-14 w-14 rounded-2xl flex items-center justify-center text-white transition-transform group-hover:scale-110 shadow-lg",
-                      option.color
-                    )}>
-                      <option.icon size={24} />
-                    </div>
-                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">{option.name}</span>
-                  </a>
-                ))}
-              </div>
-
-              <div className="space-y-3">
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Kopiuj Link</p>
-                <div className="flex items-center gap-2 p-2 bg-slate-50 rounded-2xl border border-slate-100 group">
-                  <input
-                    type="text"
-                    readOnly
-                    value={url}
-                    className="flex-1 bg-transparent border-none text-xs text-slate-600 focus:outline-none px-2 font-medium"
-                  />
-                  <button
-                    onClick={handleCopy}
-                    className={cn(
-                      "p-3 rounded-xl transition-all flex items-center gap-2 text-[10px] font-black uppercase tracking-widest",
-                      copied ? "bg-emerald-500 text-white" : "bg-white text-slate-900 shadow-sm hover:bg-slate-900 hover:text-white"
-                    )}
-                  >
-                    {copied ? (
-                      <>
-                        <Check size={14} /> Skopiowano
-                      </>
-                    ) : (
-                      <>
-                        <Copy size={14} /> Kopiuj
-                      </>
-                    )}
-                  </button>
-                </div>
-              </div>
-            </motion.div>
-          </div>
-        </>
+            </div>
+          </motion.div>
+        </div>
       )}
     </AnimatePresence>
   );

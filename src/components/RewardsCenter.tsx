@@ -13,7 +13,9 @@ import { motion } from 'motion/react';
 import { cn } from '../lib/utils';
 import React from 'react';
 
-export function RewardsCenter() {
+import { ViewProps } from '../types/view';
+
+export function RewardsCenter({ onNavigate, cart }: ViewProps) {
   const [activeTab, setActiveTab] = useState<'games' | 'courses' | 'tasks'>('games');
 
   return (
@@ -23,7 +25,7 @@ export function RewardsCenter() {
         
         <div className="relative z-10">
           <div className="flex items-center gap-2 mb-8 bg-white/10 w-fit px-4 py-1.5 rounded-full border border-white/20 text-xs font-black uppercase tracking-widest text-indigo-200">
-             <Trophy size={14} className="text-amber-400" /> OmniRewards System v2
+             <Trophy size={14} className="text-amber-400" /> noweRewards System v2
           </div>
           <h1 className="text-4xl font-black mb-6 sm:text-6xl leading-tight">
             Zmieniaj Swój Czas <br /> w <span className="text-blue-400">Zysk</span>
@@ -59,8 +61,8 @@ export function RewardsCenter() {
 
 function GamesList() {
   const games = [
-    { title: "Meta Trader Sim", reward: "Do 500 PLN/tydz", img: "https://images.unsplash.com/photo-1611974717482-58a2d201988e?auto=format&fit=crop&q=80&w=800", provider: "OmniMarket AI" },
-    { title: "AI Cyberpunk Quest", reward: "5.00 PLN/misja", img: "https://images.unsplash.com/photo-1614741118887-7a4ee193a5fa?auto=format&fit=crop&q=80&w=800", provider: "OmniMarket AI" }
+    { title: "Meta Trader Sim", reward: "Do 500 PLN/tydz", img: "https://images.unsplash.com/photo-1611974717482-58a2d201988e?auto=format&fit=crop&q=80&w=800", provider: "noweimperium AI" },
+    { title: "AI Cyberpunk Quest", reward: "5.00 PLN/misja", img: "https://images.unsplash.com/photo-1614741118887-7a4ee193a5fa?auto=format&fit=crop&q=80&w=800", provider: "noweimperium AI" }
   ];
 
   const externalPlatforms = [
